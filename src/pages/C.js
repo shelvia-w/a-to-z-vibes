@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/CardMelody.css';
+import '../styles/C.css';
 
 // Import your images
 import birthday1Front from '../assets/themes/birthday-1/front.png';
@@ -976,11 +976,6 @@ const C = () => {
 <body>
   <div class="gradient-bg"></div>
   <div class="container">
-    <!-- Music play message -->
-    <div id="music-play-message" style="position: relative; margin-bottom: 5px; color: white; padding: 8px 15px; border-radius: 20px; z-index: 9999; text-align: center; font-family: 'Winky Sans', sans-serif; box-shadow: 0 2px 10px rgba(0,0,0,0.3); font-size: 1.1rem;">
-      Click anywhere to play music
-    </div>
-    
     <div class="preview-card" id="interactive-card">
       <div class="preview-card-front">
         <img 
