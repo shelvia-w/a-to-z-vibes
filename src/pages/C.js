@@ -39,7 +39,7 @@ const musicTracks = [
   { id: 'goodvibes', name: 'Good Vibes', src: goodvibesMusic},
 ];
 
-const MAX_CHARACTERS = 150; // You can adjust this number as needed
+const MAX_CHARACTERS = 200; // You can adjust this number as needed
 
 const C = () => {
   const [cardData, setCardData] = useState({
