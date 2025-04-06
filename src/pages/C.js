@@ -601,6 +601,23 @@ const C = () => {
   // Get current music track
   const currentMusic = musicTracks.find(track => track.id === cardData.music);
 
+  // Add useEffect to update audio source when music selection changes
+  useEffect(() => {
+    if (audioRef.current) {
+      // Update the audio source
+      audioRef.current.src = currentMusic.src;
+      
+      // If music was playing, play the new track
+      if (cardData.isPlaying) {
+        audioRef.current.volume = 0.05;
+        audioRef.current.play().catch(error => {
+          console.log('Autoplay prevented after music change:', error);
+          setCardData(prev => ({ ...prev, isPlaying: false }));
+        });
+      }
+    }
+  }, [cardData.music, currentMusic.src, cardData.isPlaying]);
+
   // Add event listener for user interaction to enable autoplay
   useEffect(() => {
     // Function to force autoplay with user interaction - moved inside useEffect
@@ -1198,7 +1215,10 @@ const C = () => {
                 <select
                   className="custom-select"
                   value={cardData.music}
-                  onChange={(e) => setCardData({ ...cardData, music: e.target.value })}
+                  onChange={(e) => {
+                    const newMusic = e.target.value;
+                    setCardData({ ...cardData, music: newMusic, isPlaying: true });
+                  }}
                 >
                   {musicTracks.map((track) => (
                     <option key={track.id} value={track.id}>
