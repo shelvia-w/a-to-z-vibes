@@ -5,8 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 const letters = [
   { id: "A", title: "Coming soon...", active: false },
   { id: "B", title: "Coming soon...", active: false },
-  { id: "C", title: "Card Melody", description: "A digital card that sings from the heart 🎵.",
-    active: true},
+  { id: "C", title: "Card Melody", description: "A digital card that sings from the heart 🎵.", active: true},
   { id: "D", title: "Coming soon...", active: false },
   { id: "E", title: "Coming soon...", active: false },
   { id: "F", title: "Coming soon...", active: false },
@@ -16,7 +15,7 @@ const letters = [
   { id: "J", title: "Coming soon...", active: false },
   { id: "K", title: "Coming soon...", active: false },
   { id: "L", title: "Coming soon...", active: false },
-  { id: "M", title: "Coming soon...", active: false },
+  { id: "M", title: "Make a Wish", description: "Blow out the candles 🕯️ and make a wish.", active: true},
   { id: "N", title: "Coming soon...", active: false },
   { id: "O", title: "Coming soon...", active: false },
   { id: "P", title: "Coming soon...", active: false },
@@ -36,10 +35,17 @@ const letters = [
   { id: "♠", title: "Coming soon...", active: false },
 ];
 
-// Lazy load the C component
-const C = React.lazy(() => import('./pages/C'));
+// Dynamic component loader
+const ProjectComponent = ({ letterId }) => {
+  const Component = React.lazy(() => import(`./pages/${letterId}`));
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Component />
+    </Suspense>
+  );
+};
 
-const Card = ({ letter }) => {
+const Card = ({ letter, onOpenModal }) => {
   if (letter.active) {
     return (
       <Link to={`/${letter.id}`} style={{ textDecoration: 'none' }}>
@@ -226,6 +232,16 @@ const Footer = () => {
 };
 
 const HomePage = ({ isModalOpen, openModal, closeModal }) => {
+  const [activeModal, setActiveModal] = useState(null);
+
+  const handleOpenModal = (letterId) => {
+    setActiveModal(letterId);
+  };
+
+  const handleCloseModal = () => {
+    setActiveModal(null);
+  };
+
   return (
     <div className="container">
       <div className="gradient-bg"></div>
@@ -248,12 +264,25 @@ const HomePage = ({ isModalOpen, openModal, closeModal }) => {
 
       <div className="grid">
         {letters.map((letter) => (
-          <Card key={letter.id} letter={letter} />
+          <Card 
+            key={letter.id} 
+            letter={letter} 
+            onOpenModal={handleOpenModal}
+          />
         ))}
       </div>
 
       <Footer />
       <SideModal isOpen={isModalOpen} onClose={closeModal} />
+      
+      {activeModal && (
+        <div className="modal-overlay open" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleCloseModal}>×</button>
+            <ProjectComponent letterId={activeModal} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -280,14 +309,15 @@ export default function App() {
             />
           } 
         />
-        <Route 
-          path="/C" 
-          element={
-            <Suspense fallback={<div>Loading...</div>}>
-              <C />
-            </Suspense>
-          } 
-        />
+        {letters.map(letter => 
+          letter.active && (
+            <Route 
+              key={letter.id}
+              path={`/${letter.id}`}
+              element={<ProjectComponent letterId={letter.id} />}
+            />
+          )
+        )}
       </Routes>
     </Router>
   );

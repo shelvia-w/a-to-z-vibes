@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom';
 import '../styles/C.css';
 
 // Import your images
-import birthday1Front from '../assets/themes/birthday-1/front.png';
-import birthday1Inside from '../assets/themes/birthday-1/inside.png';
-import birthday2Front from '../assets/themes/birthday-2/front.png';
-import birthday2Inside from '../assets/themes/birthday-2/inside.png';
-import bearsFront from '../assets/themes/bears/front.png';
-import bearsInside from '../assets/themes/bears/inside.png';
+import birthday1Front from '../assets/C_themes/birthday-1/front.png';
+import birthday1Inside from '../assets/C_themes/birthday-1/inside.png';
+import birthday2Front from '../assets/C_themes/birthday-2/front.png';
+import birthday2Inside from '../assets/C_themes/birthday-2/inside.png';
+import bearsFront from '../assets/C_themes/bears/front.png';
+import bearsInside from '../assets/C_themes/bears/inside.png';
 // Import music file
-import birthdayMusic from '../assets/music/birthday-1.mp3';
-import goodvibesMusic from '../assets/music/good-vibes.mp3';
+import birthdayMusic from '../assets/C_music/birthday-1.mp3';
+import goodvibesMusic from '../assets/C_music/good-vibes.mp3';
 
 const themes = [
   { 
