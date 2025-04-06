@@ -252,7 +252,7 @@ const HomePage = ({ isModalOpen, openModal, closeModal }) => {
         ))}
       </div>
 
-      <Footer onVibeWithMe={openModal} />
+      <Footer />
       <SideModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );

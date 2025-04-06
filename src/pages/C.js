@@ -3,22 +3,40 @@ import { Link } from 'react-router-dom';
 import '../styles/CardMelody.css';
 
 // Import your images
-import birthdayFront from '../assets/themes/birthday/front.png';
-import birthdayInside from '../assets/themes/birthday/inside.png';
+import birthday1Front from '../assets/themes/birthday-1/front.png';
+import birthday1Inside from '../assets/themes/birthday-1/inside.png';
+import birthday2Front from '../assets/themes/birthday-2/front.png';
+import birthday2Inside from '../assets/themes/birthday-2/inside.png';
+import bearsFront from '../assets/themes/bears/front.png';
+import bearsInside from '../assets/themes/bears/inside.png';
 // Import music file
 import birthdayMusic from '../assets/music/birthday-1.mp3';
+import goodvibesMusic from '../assets/music/good-vibes.mp3';
 
 const themes = [
   { 
-    id: 'birthday', 
-    name: 'Birthday',
-    frontImage: birthdayFront,
-    insideImage: birthdayInside
+    id: 'birthday-1', 
+    name: 'Birthday - 1',
+    frontImage: birthday1Front,
+    insideImage: birthday1Inside
+  },
+  { 
+    id: 'birthday-2', 
+    name: 'Birthday - 2',
+    frontImage: birthday2Front,
+    insideImage: birthday2Inside
+  },
+  { 
+    id: 'bears', 
+    name: 'Bears',
+    frontImage: bearsFront,
+    insideImage: bearsInside
   }
 ];
 
 const musicTracks = [
   { id: 'birthday-1', name: 'Happy Birthday', src: birthdayMusic},
+  { id: 'goodvibes', name: 'Good Vibes', src: goodvibesMusic},
 ];
 
 const MAX_CHARACTERS = 150; // You can adjust this number as needed
@@ -26,7 +44,7 @@ const MAX_CHARACTERS = 150; // You can adjust this number as needed
 const C = () => {
   const [cardData, setCardData] = useState({
     content: '',
-    theme: 'birthday',
+    theme: 'birthday-1',
     music: 'birthday-1',
     isPreviewOpen: false,
     isPlaying: false,
@@ -379,7 +397,7 @@ const C = () => {
           class="card-inside-image"
         />
         <div class="card-letter">
-          <div class="card-content">${cardData.content.trim() || 'Your message will appear here...'}</div>
+          <div class="card-content">${cardData.content || 'Your message will appear here...'}</div>
         </div>
         <button class="card-prompt close-prompt" id="close-button">Close Card</button>
       </div>
@@ -405,7 +423,7 @@ const C = () => {
       // Function to play music
       function playMusic() {
         if (!isMusicPlaying) {
-          audio.volume = 1.0;
+          audio.volume = 0.05; // Set volume to 5%
           audio.play().then(() => {
             console.log('Audio started playing');
             isMusicPlaying = true;
@@ -449,6 +467,8 @@ const C = () => {
           audio.pause();
           isMusicPlaying = false;
         } else {
+          // Set volume to 0.05 (5% of full volume) before playing
+          audio.volume = 0.05;
           audio.play().catch(error => {
             console.log('Play prevented:', error);
           });
@@ -508,18 +528,30 @@ const C = () => {
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
       
-      // Open the URL in a new window
-      window.open(url, '_blank');
+      // Create a download link
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'card-melody.html'; // Set the filename
+      document.body.appendChild(a);
+      a.click();
       
-      // Clean up the URL object after a short delay
+      // Clean up
       setTimeout(() => {
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }, 100);
-    } catch (error) {
-      console.error("Error opening full screen card:", error);
+      
+      // Update state to show success
       setCardData(prev => ({
         ...prev,
-        saveError: 'Failed to open full screen card. Please try again.'
+        isSaved: true,
+        saveError: null
+      }));
+    } catch (error) {
+      console.error("Error saving card:", error);
+      setCardData(prev => ({
+        ...prev,
+        saveError: 'Failed to save card. Please try again.'
       }));
     }
   };
@@ -569,6 +601,52 @@ const C = () => {
   // Get current music track
   const currentMusic = musicTracks.find(track => track.id === cardData.music);
 
+  // Add event listener for user interaction to enable autoplay
+  useEffect(() => {
+    // Function to force autoplay with user interaction - moved inside useEffect
+    const forceAutoplay = () => {
+      // Try to play audio with user interaction
+      if (audioRef.current) {
+        audioRef.current.volume = 0.05;
+        audioRef.current.play().then(() => {
+          console.log('Audio started playing');
+          setCardData(prevData => ({ ...prevData, isPlaying: true }));
+        }).catch(error => {
+          console.log('Autoplay prevented:', error);
+        });
+      }
+    };
+
+    const handleUserInteraction = () => {
+      forceAutoplay();
+      // Remove event listeners after first interaction
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+
+    // Add event listeners for user interaction
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+    
+    // Try to autoplay immediately
+    if (audioRef.current) {
+      // Set volume to 0.05 (5% of full volume)
+      audioRef.current.volume = 0.05;
+      audioRef.current.play().then(() => {
+        console.log('Audio started playing automatically');
+        setCardData(prevData => ({ ...prevData, isPlaying: true }));
+      }).catch(error => {
+        console.log('Initial autoplay prevented:', error);
+      });
+    }
+
+    // Clean up event listeners
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []); // Empty dependency array since forceAutoplay is now defined inside
+
   // Function to toggle audio playback in preview
   const toggleAudio = (e) => {
     e.stopPropagation();
@@ -576,6 +654,8 @@ const C = () => {
       audioRef.current.pause();
       setCardData({ ...cardData, isPlaying: false });
     } else {
+      // Set volume to 0.05 (5% of full volume) before playing
+      audioRef.current.volume = 0.05;
       audioRef.current.play().catch(error => {
         console.log('Play prevented:', error);
       });
@@ -913,7 +993,7 @@ const C = () => {
           class="card-inside-image"
         />
         <div class="card-letter">
-          <div class="card-content">${cardData.content.trim() || 'Your message will appear here...'}</div>
+          <div class="card-content">${cardData.content || 'Your message will appear here...'}</div>
         </div>
         <button class="card-prompt close-prompt" id="close-button">Close Card</button>
       </div>
@@ -939,7 +1019,7 @@ const C = () => {
       // Function to play music
       function playMusic() {
         if (!isMusicPlaying) {
-          audio.volume = 1.0;
+          audio.volume = 0.05; // Set volume to 5%
           audio.play().then(() => {
             console.log('Audio started playing');
             isMusicPlaying = true;
@@ -983,6 +1063,8 @@ const C = () => {
           audio.pause();
           isMusicPlaying = false;
         } else {
+          // Set volume to 0.05 (5% of full volume) before playing
+          audio.volume = 0.05;
           audio.play().catch(error => {
             console.log('Play prevented:', error);
           });
@@ -1057,49 +1139,6 @@ const C = () => {
       }));
     }
   };
-
-  // Add event listener for user interaction to enable autoplay
-  useEffect(() => {
-    // Function to force autoplay with user interaction - moved inside useEffect
-    const forceAutoplay = () => {
-      // Try to play audio with user interaction
-      if (audioRef.current) {
-        audioRef.current.play().then(() => {
-          console.log('Audio started playing');
-          setCardData(prevData => ({ ...prevData, isPlaying: true }));
-        }).catch(error => {
-          console.log('Autoplay prevented:', error);
-        });
-      }
-    };
-
-    const handleUserInteraction = () => {
-      forceAutoplay();
-      // Remove event listeners after first interaction
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-
-    // Add event listeners for user interaction
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-    
-    // Try to autoplay immediately
-    if (audioRef.current) {
-      audioRef.current.play().then(() => {
-        console.log('Audio started playing automatically');
-        setCardData(prevData => ({ ...prevData, isPlaying: true }));
-      }).catch(error => {
-        console.log('Initial autoplay prevented:', error);
-      });
-    }
-
-    // Clean up event listeners
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, []); // Empty dependency array since forceAutoplay is now defined inside
 
   return (
     <div className="container">
@@ -1198,6 +1237,7 @@ const C = () => {
                 onClick={() => {
                   console.log("Card front clicked, opening card");
                   // Try to auto-play music when card is opened
+                  audioRef.current.volume = 0.05; // Set volume to 5%
                   audioRef.current.play().catch(error => {
                     console.log('Auto-play prevented. Click the sound button to play music.');
                   });
