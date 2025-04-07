@@ -602,14 +602,45 @@ const C = () => {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
       if (isMobile) {
-        // For mobile devices, use a more reliable method to open in a new tab
-        console.log("Mobile device detected, opening in new tab");
+        // For mobile devices, try to download using a more compatible approach
+        console.log("Mobile device detected, attempting to download");
         
-        // Create a temporary link element
+        // Create a temporary link element with download attribute
         const link = document.createElement('a');
         link.href = url;
+        link.download = 'card-melody.html';
         link.target = '_blank';
-        link.rel = 'noopener noreferrer';
+        
+        // Add a message to inform the user
+        const message = document.createElement('div');
+        message.style.position = 'fixed';
+        message.style.top = '50%';
+        message.style.left = '50%';
+        message.style.transform = 'translate(-50%, -50%)';
+        message.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        message.style.color = 'white';
+        message.style.padding = '20px';
+        message.style.borderRadius = '10px';
+        message.style.zIndex = '9999';
+        message.style.textAlign = 'center';
+        message.style.maxWidth = '80%';
+        message.innerHTML = `
+          <p>If the download doesn't start automatically:</p>
+          <ol style="text-align: left;">
+            <li>Open the card in the new tab</li>
+            <li>Use your browser's menu (three dots)</li>
+            <li>Select "Download" or "Save page as"</li>
+          </ol>
+          <button id="close-message" style="margin-top: 10px; padding: 5px 10px; background: #ff77e9; border: none; border-radius: 5px; color: white;">Got it</button>
+        `;
+        
+        // Add the message to the page
+        document.body.appendChild(message);
+        
+        // Add event listener to close the message
+        document.getElementById('close-message').addEventListener('click', () => {
+          document.body.removeChild(message);
+        });
         
         // Append to body, click, and remove
         document.body.appendChild(link);
@@ -621,16 +652,21 @@ const C = () => {
           URL.revokeObjectURL(url);
         }, 1000);
       } else {
-        // For desktop, use the original method
-        console.log("Desktop device detected, opening in new tab");
-        const newWindow = window.open(url, '_blank');
+        // For desktop, download the file
+        console.log("Desktop device detected, downloading file");
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'card-melody.html';
+        document.body.appendChild(a);
         
-        // Clean up the URL after the window loads
-        if (newWindow) {
-          newWindow.addEventListener('load', () => {
-            URL.revokeObjectURL(url);
-          });
-        }
+        console.log("Triggering download"); // Debug log
+        a.click();
+        
+        // Clean up
+        document.body.removeChild(a);
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 100);
       }
       
       // Update state to indicate successful save
