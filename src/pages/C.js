@@ -52,11 +52,28 @@ const C = () => {
     saveError: null,
   });
 
+  // Add state for mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
   // Add refs for the card preview
   const cardPreviewRef = useRef(null);
 
   // Add audio element reference
   const audioRef = useRef(null);
+
+  // Check for mobile device on component mount
+  React.useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+      setIsMobile(mobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Get current theme configuration
   const currentTheme = themes.find(theme => theme.id === cardData.theme);
@@ -952,7 +969,6 @@ const C = () => {
 <body>
   <div class="gradient-bg"></div>
   <div class="container">
-    <div class="music-play-message" id="music-play-message">Click anywhere to play music</div>
     
     <div class="preview-card" id="interactive-card" style="margin: auto;">
       <div class="preview-card-front">
@@ -1300,24 +1316,26 @@ const C = () => {
               </div>
             </div>
             
-            {/* Save Button moved to the left box */}
-            <div className="save-button-container">
-              <button 
-                className="save-button save-interactive-button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSaveAsInteractive();
-                }}
-                disabled={!cardData.content || cardData.content.trim() === ''}
-              >
-                Save Card
-              </button>
-              
-              {cardData.saveError && (
-                <div className="error-message">{cardData.saveError}</div>
-              )}
-            </div>
+            {/* Save Button - hidden on mobile */}
+            {!isMobile && (
+              <div className="save-button-container">
+                <button 
+                  className="save-button save-interactive-button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSaveAsInteractive();
+                  }}
+                  disabled={!cardData.content || cardData.content.trim() === ''}
+                >
+                  Save Card
+                </button>
+                
+                {cardData.saveError && (
+                  <div className="error-message">{cardData.saveError}</div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right side - Preview */}
