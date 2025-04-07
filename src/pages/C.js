@@ -702,7 +702,7 @@ const C = () => {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Card Melody - Interactive Card</title>
   <!-- Fallback font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
@@ -724,6 +724,10 @@ const C = () => {
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
     
     .container {
@@ -731,6 +735,9 @@ const C = () => {
       flex-direction: column;
       align-items: center;
       padding: 2rem;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
     }
     
     .preview-card {
@@ -971,11 +978,59 @@ const C = () => {
       background: rgba(0, 0, 0, 0.3);
       transform: scale(1.1);
     }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+      .preview-card {
+        width: 280px;
+        height: 430px;
+      }
+      
+      .card-prompt {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+      }
+      
+      .card-content {
+        font-size: 0.9rem;
+      }
+      
+      .audio-button {
+        width: 32px;
+        height: 32px;
+      }
+    }
+    
+    /* Back button for mobile */
+    .back-to-app {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      z-index: 9999;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
   </style>
 </head>
 <body>
+  <button class="back-to-app" id="back-button">←</button>
   <div class="gradient-bg"></div>
   <div class="container">
+    <!-- Music play message -->
+    <div id="music-play-message" style="position: relative; margin-bottom: 5px; color: white; padding: 8px 15px; border-radius: 20px; z-index: 9999; text-align: center; font-family: 'Winky Sans', sans-serif; font-size: 1.1rem;">
+      Click anywhere to play music
+    </div>
+    
     <div class="preview-card" id="interactive-card">
       <div class="preview-card-front">
         <img 
@@ -1026,6 +1081,7 @@ const C = () => {
       const audio = document.getElementById('background-music');
       const toggleAudioButton = document.getElementById('toggle-audio');
       const musicPlayMessage = document.getElementById('music-play-message');
+      const backButton = document.getElementById('back-button');
       let isMusicPlaying = false;
       
       // Function to play music
@@ -1100,7 +1156,7 @@ const C = () => {
         '.preview-card-front, .preview-card-inside, .card-letter, .card-content, .card-front-image, .card-inside-image {' +
         '  pointer-events: none !important;' +
         '}' +
-        '.card-prompt, .audio-button {' +
+        '.card-prompt, .audio-button, .back-to-app {' +
         '  cursor: pointer !important;' +
         '  pointer-events: auto !important;' +
         '}' +
@@ -1124,6 +1180,11 @@ const C = () => {
       });
       
       observer.observe(card, { attributes: true });
+      
+      // Handle back button click
+      backButton.addEventListener('click', function() {
+        window.history.back();
+      });
     });
   </script>
 </body>
@@ -1136,8 +1197,8 @@ const C = () => {
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
       
-      // Open the URL in a new window
-      window.open(url, '_blank');
+      // Instead of opening in a new window, navigate to the URL in the current window
+      window.location.href = url;
       
       // Clean up the URL object after a short delay
       setTimeout(() => {
