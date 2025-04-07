@@ -626,6 +626,11 @@
   pointer-events: auto !important;
 }
 
+/* Override the horizontal line from M.css - only for Card Melody project */
+.card-melody-container .audio-controls::before {
+  display: none !important;
+}
+
 /* Make audio controls visible on the front of the card */
 .preview-card-front .audio-controls {
   opacity: 1;

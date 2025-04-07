@@ -58,17 +58,69 @@ const C = () => {
   // Add audio element reference
   const audioRef = useRef(null);
 
-  // Add this function to handle content changes with character limit
-  const handleContentChange = (e) => {
-    const newContent = e.target.value;
-    if (newContent.length <= MAX_CHARACTERS) {
-      setCardData({ ...cardData, content: newContent });
-      console.log("Content updated:", newContent); // Debug log
+  // Get current theme configuration
+  const currentTheme = themes.find(theme => theme.id === cardData.theme);
+  // Get current music track
+  const currentMusic = musicTracks.find(track => track.id === cardData.music);
+
+  // Helper function to convert an image to a data URL
+  const convertImageToDataURL = async (imagePath) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => {
+        console.error('Error loading image:', imagePath);
+        // Fallback to a colored background if image loading fails
+        resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+      };
+      img.src = imagePath;
+    });
+  };
+
+  // Helper function to convert an audio file to a data URL
+  const convertAudioToDataURL = async (audioPath) => {
+    try {
+      const response = await fetch(audioPath);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error converting audio to data URL:', error);
+      // Return a placeholder or empty audio data URL
+      return 'data:audio/mp3;base64,';
     }
   };
 
-  // Add this function to handle saving the card as an interactive HTML file
-  const handleSaveAsInteractive = async () => {
+  // Function to toggle audio playback in preview
+  const toggleAudio = (e) => {
+    e.stopPropagation();
+    if (cardData.isPlaying) {
+      audioRef.current.pause();
+      setCardData({ ...cardData, isPlaying: false });
+    } else {
+      // Set volume to 0.05 (5% of full volume) before playing
+      audioRef.current.volume = 0.05;
+      audioRef.current.play().catch(error => {
+        console.log('Play prevented:', error);
+      });
+      setCardData({ ...cardData, isPlaying: true });
+    }
+  };
+
+  // Function to open card in full screen mode
+  const openFullScreenCard = async () => {
     try {
       // Get the current theme configuration
       const currentTheme = themes.find(theme => theme.id === cardData.theme);
@@ -117,11 +169,51 @@ const C = () => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       padding: 2rem;
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
+    }
+    
+    .back-to-app {
+      position: absolute;
+      left: 2rem;
+      top: 2rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      background-color: transparent;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      border: 2px solid transparent;
+      background: linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
+        linear-gradient(
+            270deg,
+            var(--gradient-pink),
+            var(--gradient-yellow),
+            var(--gradient-pink)
+          )
+          border-box;
+      background-size: 200% auto;
+      background-position: 0% center;
+      background-origin: border-box;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 2rem;
+      animation: borderShine 3s linear infinite;
+    }
+
+    .back-to-app:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 119, 233, 0.3);
+    }
+
+    @keyframes borderShine {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 200% center;
+      }
     }
     
     .preview-card {
@@ -365,14 +457,15 @@ const C = () => {
   </style>
 </head>
 <body>
+  <button class="back-to-app" id="back-button">← Back to Card Melody</button>
   <div class="gradient-bg"></div>
   <div class="container">
     <!-- Music play message -->
     <div id="music-play-message" style="position: relative; margin-bottom: 5px; color: white; padding: 8px 15px; border-radius: 20px; z-index: 9999; text-align: center; font-family: 'Winky Sans', sans-serif; font-size: 1.1rem;">
-      Click or tap anywhere to play music
+      Click anywhere to play music
     </div>
     
-    <div class="preview-card" id="interactive-card">
+    <div class="preview-card" id="interactive-card" style="margin: auto;">
       <div class="preview-card-front">
         <img 
           src="${frontImageDataUrl}" 
@@ -422,6 +515,7 @@ const C = () => {
       const audio = document.getElementById('background-music');
       const toggleAudioButton = document.getElementById('toggle-audio');
       const musicPlayMessage = document.getElementById('music-play-message');
+      const backButton = document.getElementById('back-button');
       let isMusicPlaying = false;
       
       // Function to play music
@@ -496,7 +590,7 @@ const C = () => {
         '.preview-card-front, .preview-card-inside, .card-letter, .card-content, .card-front-image, .card-inside-image {' +
         '  pointer-events: none !important;' +
         '}' +
-        '.card-prompt, .audio-button {' +
+        '.card-prompt, .audio-button, .back-to-app {' +
         '  cursor: pointer !important;' +
         '  pointer-events: auto !important;' +
         '}' +
@@ -520,6 +614,11 @@ const C = () => {
       });
       
       observer.observe(card, { attributes: true });
+      
+      // Handle back button click
+      backButton.addEventListener('click', function() {
+        window.history.back();
+      });
     });
   </script>
 </body>
@@ -532,160 +631,33 @@ const C = () => {
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
       
-      // Create a download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'card-melody.html'; // Set the filename
-      document.body.appendChild(a);
-      a.click();
+      // Instead of opening in a new window, navigate to the URL in the current window
+      window.location.href = url;
       
-      // Clean up
+      // Clean up the URL object after a short delay
       setTimeout(() => {
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }, 100);
-      
-      // Update state to show success
-      setCardData(prev => ({
-        ...prev,
-        isSaved: true,
-        saveError: null
-      }));
     } catch (error) {
-      console.error("Error saving card:", error);
+      console.error("Error opening full screen card:", error);
       setCardData(prev => ({
         ...prev,
-        saveError: 'Failed to save card. Please try again.'
+        saveError: 'Failed to open full screen card. Please try again.'
       }));
     }
   };
 
-  // Helper function to convert an image to a data URL
-  const convertImageToDataURL = async (imagePath) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = () => {
-        console.error('Error loading image:', imagePath);
-        // Fallback to a colored background if image loading fails
-        resolve('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
-      };
-      img.src = imagePath;
-    });
-  };
-
-  // Helper function to convert an audio file to a data URL
-  const convertAudioToDataURL = async (audioPath) => {
-    try {
-      const response = await fetch(audioPath);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Error converting audio to data URL:', error);
-      // Return a placeholder or empty audio data URL
-      return 'data:audio/mp3;base64,';
+  // Add this function to handle content changes with character limit
+  const handleContentChange = (e) => {
+    const newContent = e.target.value;
+    if (newContent.length <= MAX_CHARACTERS) {
+      setCardData({ ...cardData, content: newContent });
+      console.log("Content updated:", newContent); // Debug log
     }
   };
 
-  // Get current theme configuration
-  const currentTheme = themes.find(theme => theme.id === cardData.theme);
-  // Get current music track
-  const currentMusic = musicTracks.find(track => track.id === cardData.music);
-
-  // Add useEffect to update audio source when music selection changes
-  useEffect(() => {
-    if (audioRef.current) {
-      // Update the audio source
-      audioRef.current.src = currentMusic.src;
-      
-      // If music was playing, play the new track
-      if (cardData.isPlaying) {
-        audioRef.current.volume = 0.05;
-        audioRef.current.play().catch(error => {
-          console.log('Autoplay prevented after music change:', error);
-          setCardData(prev => ({ ...prev, isPlaying: false }));
-        });
-      }
-    }
-  }, [cardData.music, currentMusic.src, cardData.isPlaying]);
-
-  // Add event listener for user interaction to enable autoplay
-  useEffect(() => {
-    // Function to force autoplay with user interaction - moved inside useEffect
-    const forceAutoplay = () => {
-      // Try to play audio with user interaction
-      if (audioRef.current) {
-        audioRef.current.volume = 0.05;
-        audioRef.current.play().then(() => {
-          console.log('Audio started playing');
-          setCardData(prevData => ({ ...prevData, isPlaying: true }));
-        }).catch(error => {
-          console.log('Autoplay prevented:', error);
-        });
-      }
-    };
-
-    const handleUserInteraction = () => {
-      forceAutoplay();
-      // Remove event listeners after first interaction
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-
-    // Add event listeners for user interaction
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-    
-    // Try to autoplay immediately
-    if (audioRef.current) {
-      // Set volume to 0.05 (5% of full volume)
-      audioRef.current.volume = 0.05;
-      audioRef.current.play().then(() => {
-        console.log('Audio started playing automatically');
-        setCardData(prevData => ({ ...prevData, isPlaying: true }));
-      }).catch(error => {
-        console.log('Initial autoplay prevented:', error);
-      });
-    }
-
-    // Clean up event listeners
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, []); // Empty dependency array since forceAutoplay is now defined inside
-
-  // Function to toggle audio playback in preview
-  const toggleAudio = (e) => {
-    e.stopPropagation();
-    if (cardData.isPlaying) {
-      audioRef.current.pause();
-      setCardData({ ...cardData, isPlaying: false });
-    } else {
-      // Set volume to 0.05 (5% of full volume) before playing
-      audioRef.current.volume = 0.05;
-      audioRef.current.play().catch(error => {
-        console.log('Play prevented:', error);
-      });
-      setCardData({ ...cardData, isPlaying: true });
-    }
-  };
-
-  // Function to open card in full screen mode
-  const openFullScreenCard = async () => {
+  // Add this function to handle saving the card as an interactive HTML file
+  const handleSaveAsInteractive = async () => {
     try {
       // Get the current theme configuration
       const currentTheme = themes.find(theme => theme.id === cardData.theme);
@@ -706,7 +678,7 @@ const C = () => {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Card Melody - Interactive Card</title>
   <!-- Fallback font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
@@ -728,22 +700,57 @@ const C = () => {
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow: hidden;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      touch-action: manipulation;
     }
     
     .container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       padding: 2rem;
-      width: 100%;
-      height: 100%;
-      overflow-y: auto;
+    }
+    
+    .back-to-app {
+      position: absolute;
+      left: 2rem;
+      top: 2rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      background-color: transparent;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      border: 2px solid transparent;
+      background: linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
+        linear-gradient(
+            270deg,
+            var(--gradient-pink),
+            var(--gradient-yellow),
+            var(--gradient-pink)
+          )
+          border-box;
+      background-size: 200% auto;
+      background-position: 0% center;
+      background-origin: border-box;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 2rem;
+      animation: borderShine 3s linear infinite;
+    }
+
+    .back-to-app:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 119, 233, 0.3);
+    }
+
+    @keyframes borderShine {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 200% center;
+      }
     }
     
     .preview-card {
@@ -857,7 +864,6 @@ const C = () => {
       -moz-appearance: none;
       outline: none;
       background-color: rgba(0, 0, 0, 0.5);
-      cursor: pointer;
     }
     
     .card-prompt:hover {
@@ -985,75 +991,6 @@ const C = () => {
       background: rgba(0, 0, 0, 0.3);
       transform: scale(1.1);
     }
-    
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-      .preview-card {
-        width: 280px;
-        height: 430px;
-      }
-      
-      .card-prompt {
-        font-size: 0.8rem;
-        padding: 6px 12px;
-      }
-      
-      .card-content {
-        font-size: 0.9rem;
-      }
-      
-      .audio-button {
-        width: 32px;
-        height: 32px;
-      }
-    }
-    
-    /* Back button for mobile */
-    .back-to-app {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      display: inline-flex;
-      align-items: center;
-      padding: 0.75rem 1.5rem;
-      border-radius: 999px;
-      background-color: transparent;
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border: 2px solid transparent;
-      background: linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
-        linear-gradient(
-            270deg,
-            var(--gradient-pink),
-            var(--gradient-yellow),
-            var(--gradient-pink)
-          )
-          border-box;
-      background-size: 200% auto;
-      background-position: 0% center;
-      background-origin: border-box;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin-bottom: 2rem;
-      animation: borderShine 3s linear infinite;
-      z-index: 9999;
-    }
-    
-    .back-to-app:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 119, 233, 0.3);
-    }
-    
-    @keyframes borderShine {
-      0% {
-        background-position: 0% center;
-      }
-      100% {
-        background-position: 200% center;
-      }
-    }
   </style>
 </head>
 <body>
@@ -1062,10 +999,10 @@ const C = () => {
   <div class="container">
     <!-- Music play message -->
     <div id="music-play-message" style="position: relative; margin-bottom: 5px; color: white; padding: 8px 15px; border-radius: 20px; z-index: 9999; text-align: center; font-family: 'Winky Sans', sans-serif; font-size: 1.1rem;">
-      Tap anywhere to play music
+      Click anywhere to play music
     </div>
     
-    <div class="preview-card" id="interactive-card">
+    <div class="preview-card" id="interactive-card" style="margin: auto;">
       <div class="preview-card-front">
         <img 
           src="${frontImageDataUrl}" 
@@ -1102,7 +1039,7 @@ const C = () => {
   </div>
 
   <!-- Hidden audio element -->
-  <audio id="background-music" loop>
+  <audio id="background-music" loop autoplay>
     <source src="${musicDataUrl}" type="audio/mp3">
     Your browser does not support the audio element.
   </audio>
@@ -1139,12 +1076,8 @@ const C = () => {
       // Try to autoplay immediately when the page loads
       playMusic();
       
-      // Add click and touch event listeners to the entire document as fallback
+      // Add click event listener to the entire document as fallback
       document.addEventListener('click', function() {
-        playMusic();
-      }, { once: true });
-      
-      document.addEventListener('touchstart', function() {
         playMusic();
       }, { once: true });
       
@@ -1155,14 +1088,6 @@ const C = () => {
         card.classList.add('open');
       });
       
-      // Add touch event for mobile
-      openButton.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Open button touched');
-        card.classList.add('open');
-      });
-      
       // Close card when clicking close button
       closeButton.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -1170,34 +1095,8 @@ const C = () => {
         card.classList.remove('open');
       });
       
-      // Add touch event for mobile
-      closeButton.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Close button touched');
-        card.classList.remove('open');
-      });
-      
       // Toggle audio play/pause
       toggleAudioButton.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (isMusicPlaying) {
-          audio.pause();
-          isMusicPlaying = false;
-        } else {
-          // Set volume to 0.05 (5% of full volume) before playing
-          audio.volume = 0.05;
-          audio.play().catch(error => {
-            console.log('Play prevented:', error);
-          });
-          isMusicPlaying = true;
-        }
-        updateAudioButtonIcon();
-      });
-      
-      // Add touch event for mobile
-      toggleAudioButton.addEventListener('touchend', function(e) {
-        e.preventDefault();
         e.stopPropagation();
         if (isMusicPlaying) {
           audio.pause();
@@ -1257,17 +1156,6 @@ const C = () => {
       backButton.addEventListener('click', function() {
         window.history.back();
       });
-      
-      // Handle back button touch for mobile
-      backButton.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        window.history.back();
-      });
-      
-      // Add a global touch event to play music on any touch
-      document.addEventListener('touchstart', function() {
-        playMusic();
-      }, { once: true });
     });
   </script>
 </body>
