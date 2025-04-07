@@ -117,7 +117,11 @@ const C = () => {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       padding: 2rem;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
     }
     
     .preview-card {
@@ -734,6 +738,7 @@ const C = () => {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       padding: 2rem;
       width: 100%;
       height: 100%;
@@ -1006,24 +1011,51 @@ const C = () => {
       position: fixed;
       top: 20px;
       left: 20px;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      z-index: 9999;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      background-color: transparent;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: 2px solid transparent;
+      background: linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
+        linear-gradient(
+            270deg,
+            var(--gradient-pink),
+            var(--gradient-yellow),
+            var(--gradient-pink)
+          )
+          border-box;
+      background-size: 200% auto;
+      background-position: 0% center;
+      background-origin: border-box;
       cursor: pointer;
-      backdrop-filter: blur(4px);
+      transition: all 0.2s ease;
+      margin-bottom: 2rem;
+      animation: borderShine 3s linear infinite;
+      z-index: 9999;
+    }
+    
+    .back-to-app:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 119, 233, 0.3);
+    }
+    
+    @keyframes borderShine {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 200% center;
+      }
     }
   </style>
 </head>
 <body>
-  <button class="back-to-app" id="back-button">←</button>
+  <button class="back-to-app" id="back-button">← Back to Card Melody</button>
   <div class="gradient-bg"></div>
   <div class="container">
     <!-- Music play message -->
