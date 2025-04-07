@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/C.css';
 
@@ -50,7 +50,6 @@ const C = () => {
     isPlaying: false,
     isSaved: false,
     saveError: null,
-    isMobile: false,
   });
 
   // Add refs for the card preview
@@ -123,16 +122,6 @@ const C = () => {
   // Function to save the card as an interactive HTML file
   const handleSaveAsInteractive = async () => {
     try {
-      // Check if the device is mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                      (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
-      
-      if (isMobile) {
-        // For mobile devices, show a message that this feature is not available
-        alert("The save card feature is not available on mobile devices. Please use a desktop browser to save your card.");
-        return;
-      }
-      
       console.log("Save Card button clicked"); // Debug log
       
       // Get the current theme configuration
@@ -1239,21 +1228,6 @@ const C = () => {
     }
   };
 
-  // Add this useEffect to check if the device is mobile when the component mounts
-  useEffect(() => {
-    // Check if the device is mobile
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                    (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
-    
-    if (isMobile) {
-      // Update state to indicate this is a mobile device
-      setCardData(prev => ({
-        ...prev,
-        isMobile: true
-      }));
-    }
-  }, []);
-
   return (
     <div className="container">
       {/* Audio element for preview */}
@@ -1328,24 +1302,17 @@ const C = () => {
             
             {/* Save Button moved to the left box */}
             <div className="save-button-container">
-              {cardData.isMobile ? (
-                <div className="mobile-message">
-                  <p>The save card feature is not available on mobile devices.</p>
-                  <p>Please use a desktop browser to save your card.</p>
-                </div>
-              ) : (
-                <button 
-                  className="save-button save-interactive-button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSaveAsInteractive();
-                  }}
-                  disabled={!cardData.content || cardData.content.trim() === ''}
-                >
-                  Save Card
-                </button>
-              )}
+              <button 
+                className="save-button save-interactive-button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSaveAsInteractive();
+                }}
+                disabled={!cardData.content || cardData.content.trim() === ''}
+              >
+                Save Card
+              </button>
               
               {cardData.saveError && (
                 <div className="error-message">{cardData.saveError}</div>
