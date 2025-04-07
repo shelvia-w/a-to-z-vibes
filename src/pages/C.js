@@ -599,90 +599,123 @@ const C = () => {
       const url = URL.createObjectURL(blob);
       
       // Check if the device is mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                      (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
       
       if (isMobile) {
-        // For mobile devices, try to download using a more compatible approach
-        console.log("Mobile device detected, attempting to download");
+        console.log("Mobile device detected, using mobile-friendly approach");
         
-        // Create a temporary link element with download attribute
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'card-melody.html';
-        link.target = '_blank';
+        // Create a modal overlay to display the card
+        const modalOverlay = document.createElement('div');
+        modalOverlay.style.position = 'fixed';
+        modalOverlay.style.top = '0';
+        modalOverlay.style.left = '0';
+        modalOverlay.style.width = '100%';
+        modalOverlay.style.height = '100%';
+        modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        modalOverlay.style.zIndex = '9999';
+        modalOverlay.style.display = 'flex';
+        modalOverlay.style.justifyContent = 'center';
+        modalOverlay.style.alignItems = 'center';
+        modalOverlay.style.overflow = 'auto';
         
-        // Add a message to inform the user
-        const message = document.createElement('div');
-        message.style.position = 'fixed';
-        message.style.top = '50%';
-        message.style.left = '50%';
-        message.style.transform = 'translate(-50%, -50%)';
-        message.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        message.style.color = 'white';
-        message.style.padding = '20px';
-        message.style.borderRadius = '10px';
-        message.style.zIndex = '9999';
-        message.style.textAlign = 'center';
-        message.style.maxWidth = '80%';
-        message.innerHTML = `
-          <p>If the download doesn't start automatically:</p>
-          <ol style="text-align: left;">
-            <li>Open the card in the new tab</li>
-            <li>Use your browser's menu (three dots)</li>
-            <li>Select "Download" or "Save page as"</li>
-          </ol>
-          <button id="close-message" style="margin-top: 10px; padding: 5px 10px; background: #ff77e9; border: none; border-radius: 5px; color: white;">Got it</button>
-        `;
+        // Create an iframe to display the card
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.backgroundColor = 'transparent';
         
-        // Add the message to the page
-        document.body.appendChild(message);
+        // Create a close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '×';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.width = '40px';
+        closeButton.style.height = '40px';
+        closeButton.style.borderRadius = '50%';
+        closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        closeButton.style.color = 'white';
+        closeButton.style.fontSize = '24px';
+        closeButton.style.border = 'none';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.zIndex = '10000';
+        closeButton.style.display = 'flex';
+        closeButton.style.justifyContent = 'center';
+        closeButton.style.alignItems = 'center';
         
-        // Add event listener to close the message
-        document.getElementById('close-message').addEventListener('click', () => {
-          document.body.removeChild(message);
+        // Add event listener to close the modal
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay);
+          URL.revokeObjectURL(url);
         });
         
-        // Append to body, click, and remove
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Add the iframe and close button to the modal
+        modalOverlay.appendChild(iframe);
+        modalOverlay.appendChild(closeButton);
         
-        // Clean up the URL after a delay
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
+        // Add the modal to the body
+        document.body.appendChild(modalOverlay);
+        
+        // Set the iframe source to the blob URL
+        iframe.src = url;
+        
+        // Fallback: If iframe doesn't load within 2 seconds, try opening in a new tab
+        const fallbackTimer = setTimeout(() => {
+          if (!iframe.contentWindow || !iframe.contentWindow.document) {
+            console.log("Iframe failed to load, trying fallback method");
+            document.body.removeChild(modalOverlay);
+            
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            
+            // Append to body, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }, 2000);
+        
+        // Clean up the URL after a delay if the modal is closed
+        modalOverlay.addEventListener('click', (e) => {
+          if (e.target === modalOverlay) {
+            document.body.removeChild(modalOverlay);
+            URL.revokeObjectURL(url);
+            clearTimeout(fallbackTimer);
+          }
+        });
       } else {
-        // For desktop, download the file
-        console.log("Desktop device detected, downloading file");
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'card-melody.html';
-        document.body.appendChild(a);
+        // For desktop, use the original method
+        console.log("Desktop device detected, opening in new tab");
+        const newWindow = window.open(url, '_blank');
         
-        console.log("Triggering download"); // Debug log
-        a.click();
-        
-        // Clean up
-        document.body.removeChild(a);
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 100);
+        // Clean up the URL after the window loads
+        if (newWindow) {
+          newWindow.addEventListener('load', () => {
+            URL.revokeObjectURL(url);
+          });
+        }
       }
       
-      // Update state to indicate successful save
-      setCardData(prev => ({
-        ...prev,
-        isSaved: true,
-        saveError: null
-      }));
-      
-      console.log("Card saved successfully"); // Debug log
     } catch (error) {
-      console.error("Error saving card:", error);
+      console.error("Error opening full screen card:", error);
       setCardData(prev => ({
         ...prev,
-        saveError: 'Failed to save card. Please try again.'
+        saveError: 'Failed to open card in full screen. Please try again.'
       }));
+    }
+  };
+
+  // Add this function to handle content changes with character limit
+  const handleContentChange = (e) => {
+    const newContent = e.target.value;
+    if (newContent.length <= MAX_CHARACTERS) {
+      setCardData({ ...cardData, content: newContent });
+      console.log("Content updated:", newContent); // Debug log
     }
   };
 
@@ -977,11 +1010,29 @@ const C = () => {
       background: rgba(0, 0, 0, 0.3);
       transform: scale(1.1);
     }
+
+    /* Music play message styles */
+    .music-play-message {
+      font-family: "Winky Sans", sans-serif;
+      position: relative;
+      margin-bottom: 1rem;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 1.2rem;
+      color: white;
+      backdrop-filter: blur(4px);
+      z-index: 5000;
+      transition: all 0.3s ease;
+      text-align: center;
+      pointer-events: none;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="gradient-bg"></div>
   <div class="container">
+    <div class="music-play-message" id="music-play-message">Click anywhere to play music</div>
     
     <div class="preview-card" id="interactive-card" style="margin: auto;">
       <div class="preview-card-front">
@@ -1032,6 +1083,7 @@ const C = () => {
       const closeButton = document.getElementById('close-button');
       const audio = document.getElementById('background-music');
       const toggleAudioButton = document.getElementById('toggle-audio');
+      const musicPlayMessage = document.getElementById('music-play-message');
       let isMusicPlaying = false;
       
       // Function to play music
@@ -1042,8 +1094,12 @@ const C = () => {
             console.log('Audio started playing');
             isMusicPlaying = true;
             updateAudioButtonIcon();
+            // Hide the message after music starts playing
+            musicPlayMessage.style.display = 'none';
           }).catch(error => {
             console.log('Play prevented:', error);
+            // Show message if autoplay was prevented
+            musicPlayMessage.style.display = 'block';
           });
         }
       }
@@ -1141,27 +1197,95 @@ const C = () => {
       const url = URL.createObjectURL(blob);
       
       // Check if the device is mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                      (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
       
       if (isMobile) {
-        // For mobile devices, use a more reliable method to open in a new tab
-        console.log("Mobile device detected, opening in new tab");
+        console.log("Mobile device detected, using mobile-friendly approach");
         
-        // Create a temporary link element
-        const link = document.createElement('a');
-        link.href = url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
+        // Create a modal overlay to display the card
+        const modalOverlay = document.createElement('div');
+        modalOverlay.style.position = 'fixed';
+        modalOverlay.style.top = '0';
+        modalOverlay.style.left = '0';
+        modalOverlay.style.width = '100%';
+        modalOverlay.style.height = '100%';
+        modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        modalOverlay.style.zIndex = '9999';
+        modalOverlay.style.display = 'flex';
+        modalOverlay.style.justifyContent = 'center';
+        modalOverlay.style.alignItems = 'center';
+        modalOverlay.style.overflow = 'auto';
         
-        // Append to body, click, and remove
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Create an iframe to display the card
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.backgroundColor = 'transparent';
         
-        // Clean up the URL after a delay
-        setTimeout(() => {
+        // Create a close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '×';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.width = '40px';
+        closeButton.style.height = '40px';
+        closeButton.style.borderRadius = '50%';
+        closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        closeButton.style.color = 'white';
+        closeButton.style.fontSize = '24px';
+        closeButton.style.border = 'none';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.zIndex = '10000';
+        closeButton.style.display = 'flex';
+        closeButton.style.justifyContent = 'center';
+        closeButton.style.alignItems = 'center';
+        
+        // Add event listener to close the modal
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay);
           URL.revokeObjectURL(url);
-        }, 1000);
+        });
+        
+        // Add the iframe and close button to the modal
+        modalOverlay.appendChild(iframe);
+        modalOverlay.appendChild(closeButton);
+        
+        // Add the modal to the body
+        document.body.appendChild(modalOverlay);
+        
+        // Set the iframe source to the blob URL
+        iframe.src = url;
+        
+        // Fallback: If iframe doesn't load within 2 seconds, try opening in a new tab
+        const fallbackTimer = setTimeout(() => {
+          if (!iframe.contentWindow || !iframe.contentWindow.document) {
+            console.log("Iframe failed to load, trying fallback method");
+            document.body.removeChild(modalOverlay);
+            
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            
+            // Append to body, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }, 2000);
+        
+        // Clean up the URL after a delay if the modal is closed
+        modalOverlay.addEventListener('click', (e) => {
+          if (e.target === modalOverlay) {
+            document.body.removeChild(modalOverlay);
+            URL.revokeObjectURL(url);
+            clearTimeout(fallbackTimer);
+          }
+        });
       } else {
         // For desktop, use the original method
         console.log("Desktop device detected, opening in new tab");
@@ -1181,15 +1305,6 @@ const C = () => {
         ...prev,
         saveError: 'Failed to open card in full screen. Please try again.'
       }));
-    }
-  };
-
-  // Add this function to handle content changes with character limit
-  const handleContentChange = (e) => {
-    const newContent = e.target.value;
-    if (newContent.length <= MAX_CHARACTERS) {
-      setCardData({ ...cardData, content: newContent });
-      console.log("Content updated:", newContent); // Debug log
     }
   };
 
