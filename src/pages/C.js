@@ -598,20 +598,40 @@ const C = () => {
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
       
-      // Create a download link and trigger it
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'card-melody.html';
-      document.body.appendChild(a);
+      // Check if the device is mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      console.log("Triggering download"); // Debug log
-      a.click();
-      
-      // Clean up
-      document.body.removeChild(a);
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 100);
+      if (isMobile) {
+        // For mobile devices, use a more reliable method to open in a new tab
+        console.log("Mobile device detected, opening in new tab");
+        
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        // Append to body, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      } else {
+        // For desktop, use the original method
+        console.log("Desktop device detected, opening in new tab");
+        const newWindow = window.open(url, '_blank');
+        
+        // Clean up the URL after the window loads
+        if (newWindow) {
+          newWindow.addEventListener('load', () => {
+            URL.revokeObjectURL(url);
+          });
+        }
+      }
       
       // Update state to indicate successful save
       setCardData(prev => ({
@@ -1084,14 +1104,39 @@ const C = () => {
       // Create a URL for the blob
       const url = URL.createObjectURL(blob);
       
-      // Open in a new tab
-      const newWindow = window.open(url, '_blank');
+      // Check if the device is mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // Clean up the URL after the window loads
-      if (newWindow) {
-        newWindow.addEventListener('load', () => {
+      if (isMobile) {
+        // For mobile devices, use a more reliable method to open in a new tab
+        console.log("Mobile device detected, opening in new tab");
+        
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        // Append to body, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
           URL.revokeObjectURL(url);
-        });
+        }, 1000);
+      } else {
+        // For desktop, use the original method
+        console.log("Desktop device detected, opening in new tab");
+        const newWindow = window.open(url, '_blank');
+        
+        // Clean up the URL after the window loads
+        if (newWindow) {
+          newWindow.addEventListener('load', () => {
+            URL.revokeObjectURL(url);
+          });
+        }
       }
       
     } catch (error) {
