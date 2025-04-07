@@ -369,7 +369,7 @@ const C = () => {
   <div class="container">
     <!-- Music play message -->
     <div id="music-play-message" style="position: relative; margin-bottom: 5px; color: white; padding: 8px 15px; border-radius: 20px; z-index: 9999; text-align: center; font-family: 'Winky Sans', sans-serif; font-size: 1.1rem;">
-      Click anywhere to play music
+      Click or tap anywhere to play music
     </div>
     
     <div class="preview-card" id="interactive-card">
@@ -732,6 +732,7 @@ const C = () => {
       position: fixed;
       width: 100%;
       height: 100%;
+      touch-action: manipulation;
     }
     
     .container {
@@ -856,6 +857,7 @@ const C = () => {
       -moz-appearance: none;
       outline: none;
       background-color: rgba(0, 0, 0, 0.5);
+      cursor: pointer;
     }
     
     .card-prompt:hover {
@@ -1060,7 +1062,7 @@ const C = () => {
   <div class="container">
     <!-- Music play message -->
     <div id="music-play-message" style="position: relative; margin-bottom: 5px; color: white; padding: 8px 15px; border-radius: 20px; z-index: 9999; text-align: center; font-family: 'Winky Sans', sans-serif; font-size: 1.1rem;">
-      Click anywhere to play music
+      Tap anywhere to play music
     </div>
     
     <div class="preview-card" id="interactive-card">
@@ -1100,7 +1102,7 @@ const C = () => {
   </div>
 
   <!-- Hidden audio element -->
-  <audio id="background-music" loop autoplay>
+  <audio id="background-music" loop>
     <source src="${musicDataUrl}" type="audio/mp3">
     Your browser does not support the audio element.
   </audio>
@@ -1137,8 +1139,12 @@ const C = () => {
       // Try to autoplay immediately when the page loads
       playMusic();
       
-      // Add click event listener to the entire document as fallback
+      // Add click and touch event listeners to the entire document as fallback
       document.addEventListener('click', function() {
+        playMusic();
+      }, { once: true });
+      
+      document.addEventListener('touchstart', function() {
         playMusic();
       }, { once: true });
       
@@ -1149,6 +1155,14 @@ const C = () => {
         card.classList.add('open');
       });
       
+      // Add touch event for mobile
+      openButton.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Open button touched');
+        card.classList.add('open');
+      });
+      
       // Close card when clicking close button
       closeButton.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -1156,8 +1170,34 @@ const C = () => {
         card.classList.remove('open');
       });
       
+      // Add touch event for mobile
+      closeButton.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Close button touched');
+        card.classList.remove('open');
+      });
+      
       // Toggle audio play/pause
       toggleAudioButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (isMusicPlaying) {
+          audio.pause();
+          isMusicPlaying = false;
+        } else {
+          // Set volume to 0.05 (5% of full volume) before playing
+          audio.volume = 0.05;
+          audio.play().catch(error => {
+            console.log('Play prevented:', error);
+          });
+          isMusicPlaying = true;
+        }
+        updateAudioButtonIcon();
+      });
+      
+      // Add touch event for mobile
+      toggleAudioButton.addEventListener('touchend', function(e) {
+        e.preventDefault();
         e.stopPropagation();
         if (isMusicPlaying) {
           audio.pause();
@@ -1217,6 +1257,17 @@ const C = () => {
       backButton.addEventListener('click', function() {
         window.history.back();
       });
+      
+      // Handle back button touch for mobile
+      backButton.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        window.history.back();
+      });
+      
+      // Add a global touch event to play music on any touch
+      document.addEventListener('touchstart', function() {
+        playMusic();
+      }, { once: true });
     });
   </script>
 </body>
