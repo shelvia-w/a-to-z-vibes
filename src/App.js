@@ -44,6 +44,7 @@ const Card = ({ letter, onOpenSky }) => {
       <button className="card card-button" onClick={onOpenSky}>
         <h2 className="card-number">{letter}</h2>
         <p className="card-coming-soon">A Sky Full of Stars</p>
+        <p className="card-subtitle">Wander through the beauty of the constellations and dance among the stars</p>
       </button>
     );
   }
