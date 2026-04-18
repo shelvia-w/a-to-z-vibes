@@ -53,19 +53,6 @@ body {
   height: auto;
 }
 
-.logo-text {
-  font-size: 2.5rem;
-  font-weight: bold;
-  background: linear-gradient(
-    to right,
-    var(--gradient-pink),
-    var(--gradient-yellow)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 .title {
   font-family: "Play", sans-serif;
   font-size: 3.5rem;
@@ -153,7 +140,7 @@ body {
 
 .card {
   background-color: var(--card-bg);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -193,35 +180,6 @@ body {
   box-shadow: 0 10px 20px rgba(90, 70, 180, 0.3);
 }
 
-.card.active {
-  position: relative;
-}
-
-.card.active::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 1rem;
-  padding: 2px;
-  background: linear-gradient(
-    to right,
-    var(--gradient-pink),
-    var(--gradient-yellow)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
-.card-title {
-  font-family: "Play", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: white;
-}
-
 .card-number {
   font-size: 2.5rem;
   font-weight: bold;
@@ -243,14 +201,6 @@ body {
 .card-coming-soon {
   color: #a299bc;
   font-size: 0.9rem;
-}
-
-.card-description {
-  font-family: "Winky Sans", sans-serif;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-bottom: 1rem;
-  color: #a299bc;
 }
 
 .gradient-bg {
@@ -349,7 +299,7 @@ body {
 .modal-coding {
   display: flex;
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 20px;
   align-items: flex-start;
   margin-bottom: 20px;
@@ -390,33 +340,6 @@ body {
 
 .modal-overlay.open {
   display: flex;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  position: relative;
-  max-width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
-  padding: 0.5rem;
-  line-height: 1;
-}
-
-.modal-close:hover {
-  color: #333;
 }
 
 /* Footer Styles */
@@ -460,10 +383,6 @@ body {
   color: #14edf5;
 }
 
-.lightning-icon {
-  stroke: #b91d73;
-}
-
 .section-content h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
@@ -477,198 +396,6 @@ body {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.creator-link {
-  color: #f953c6;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.creator-link:hover {
-  text-decoration: underline;
-}
-
-.tools-section {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.tool-card {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  padding: 15px;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.tool-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
-}
-
-.tool-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-right: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.tool-image {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.tool-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.tool-info p {
-  margin: 0;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.vibes-footer {
-  margin-top: auto;
-  padding-top: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.project-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-}
-
-.project-header {
-  text-align: center;
-  margin-bottom: 4rem;
-  position: relative;
-}
-
-.project-title-container {
-  margin-top: 3rem;
-}
-
-.project-title-container .card-number {
-  font-size: 4rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  background: linear-gradient(
-    to right,
-    var(--gradient-pink),
-    var(--gradient-yellow)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.project-title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  background: linear-gradient(
-    to right,
-    var(--gradient-yellow),
-    var(--gradient-pink),
-    var(--gradient-yellow) /* loop back to start */
-  );
-  background-size: 200% auto; /* make the gradient wider than the element */
-  background-position: 0% center;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shine 3s linear infinite;
-}
-
-.project-description {
-  font-size: 1.2rem;
-  color: #a299bc;
-  margin-bottom: 2rem;
-}
-
-.project-content {
-  background-color: var(--card-bg);
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-top: 2rem;
-  border: 2px solid transparent;
-  background: linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
-    linear-gradient(
-      270deg,
-      var(--gradient-pink),
-      var(--gradient-yellow),
-      var(--gradient-pink)
-    )
-    border-box;
-}
-
-.project-section {
-  margin-bottom: 2rem;
-}
-
-.project-section:last-child {
-  margin-bottom: 0;
-}
-
-.project-section h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--gradient-pink);
-}
-
-.project-section p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.feature-list {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.feature-list li {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.feature-list li:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 5px 15px rgba(255, 119, 233, 0.1);
-}
-
-
-.back-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 119, 233, 0.3);
-}
 
 /* Custom Scrollbar Styles */
 ::-webkit-scrollbar {
@@ -693,4 +420,3 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--gradient-pink) var(--dark-bg);
 }
-
