@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./styles.css";
+import LetterA from "./letters/A/letter-a";
 
 const LETTERS = [
   "A",
@@ -28,18 +29,32 @@ const LETTERS = [
   "X",
   "Y",
   "Z",
-  "Diamond",
-  "Club",
-  "Heart",
-  "Spade",
+  "♦",
+  "♣",
+  "♥",
+  "♠",
 ];
 
-const Card = ({ letter }) => (
-  <div className="card">
-    <h2 className="card-number">{letter}</h2>
-    <p className="card-coming-soon">Coming soon...</p>
-  </div>
-);
+const SKY_HASH = "#a-sky-full-of-stars";
+const logoSrc = `${process.env.PUBLIC_URL}/img/cute_pet_logo.png`;
+
+const Card = ({ letter, onOpenSky }) => {
+  if (letter === "A") {
+    return (
+      <button className="card card-button" onClick={onOpenSky}>
+        <h2 className="card-number">{letter}</h2>
+        <p className="card-coming-soon">A Sky Full of Stars</p>
+      </button>
+    );
+  }
+
+  return (
+    <div className="card">
+      <h2 className="card-number">{letter}</h2>
+      <p className="card-coming-soon">Coming soon...</p>
+    </div>
+  );
+};
 
 const Icon = ({ type }) => {
   const commonProps = {
@@ -166,7 +181,7 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-content">
-        Copyright 2025{" "}
+        Copyright 2026{" "}
         <a href="https://shelvia-w.github.io" className="footer-link">
           Shelvia Wongso
         </a>
@@ -178,6 +193,32 @@ const Footer = () => {
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(() =>
+    window.location.hash === SKY_HASH ? "sky" : "home"
+  );
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentPage(window.location.hash === SKY_HASH ? "sky" : "home");
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const openSkyPage = () => {
+    window.location.hash = SKY_HASH;
+    setCurrentPage("sky");
+  };
+
+  const closeSkyPage = () => {
+    window.location.hash = "";
+    setCurrentPage("home");
+  };
+
+  if (currentPage === "sky") {
+    return <LetterA onBack={closeSkyPage} />;
+  }
 
   return (
     <div className="container">
@@ -185,7 +226,7 @@ export default function App() {
       <header className="header">
         <div className="logo">
           <img
-            src="/img/cute_pet_logo.png"
+            src={logoSrc}
             alt="A to Z Vibe Coding Logo"
             className="logo-image"
           />
@@ -201,7 +242,7 @@ export default function App() {
 
       <main className="grid">
         {LETTERS.map((letter) => (
-          <Card key={letter} letter={letter} />
+          <Card key={letter} letter={letter} onOpenSky={openSkyPage} />
         ))}
       </main>
 

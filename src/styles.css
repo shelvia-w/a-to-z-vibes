@@ -24,6 +24,10 @@ body {
   overflow-x: hidden;
 }
 
+button {
+  font: inherit;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -49,7 +53,7 @@ body {
 
 .logo-image {
   width: 100%;
-  max-width: 200px; /* Adjust based on your desired size */
+  max-width: 200px;
   height: auto;
 }
 
@@ -62,9 +66,9 @@ body {
     to right,
     var(--gradient-yellow),
     var(--gradient-pink),
-    var(--gradient-yellow) /* loop back to start */
+    var(--gradient-yellow)
   );
-  background-size: 200% auto; /* make the gradient wider than the element */
+  background-size: 200% auto;
   background-position: 0% center;
   -webkit-background-clip: text;
   background-clip: text;
@@ -148,8 +152,6 @@ body {
   text-align: center;
   transition: all 0.3s ease;
   aspect-ratio: 1;
-
-  /* Gradient border magic */
   border: 2px solid transparent;
   background: linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
     linear-gradient(
@@ -164,6 +166,17 @@ body {
   background-size: 200% auto;
   background-position: 0% center;
   animation: cardShine 4s linear infinite;
+}
+
+.card-button {
+  width: 100%;
+  color: inherit;
+  cursor: pointer;
+}
+
+.card-button:focus-visible {
+  outline: 3px solid var(--gradient-yellow);
+  outline-offset: 4px;
 }
 
 @keyframes cardShine {
@@ -188,9 +201,9 @@ body {
     to right,
     var(--gradient-yellow),
     var(--gradient-pink),
-    var(--gradient-yellow) /* loop back to start */
+    var(--gradient-yellow)
   );
-  background-size: 200% auto; /* make the gradient wider than the element */
+  background-size: 200% auto;
   background-position: 0% center;
   -webkit-background-clip: text;
   background-clip: text;
@@ -219,7 +232,6 @@ body {
   z-index: -1;
 }
 
-/* Side Modal Styles */
 .side-modal {
   position: fixed;
   top: 0;
@@ -342,14 +354,13 @@ body {
   display: flex;
 }
 
-/* Footer Styles */
 .footer {
   padding: 1rem;
   text-align: center;
 }
 
 .footer-content {
-  color: #777; /* dimmed font color */
+  color: #777;
   font-size: 0.9rem;
 }
 
@@ -396,8 +407,6 @@ body {
   color: rgba(255, 255, 255, 0.8);
 }
 
-
-/* Custom Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -413,10 +422,4 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--gradient-pink);
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--gradient-pink) var(--dark-bg);
 }

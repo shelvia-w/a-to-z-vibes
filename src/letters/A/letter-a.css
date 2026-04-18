@@ -1,0 +1,925 @@
+:root {
+  --gradient-pink: #ff77e9;
+  --gradient-yellow: #dab619;
+  --dark-bg: #0f0a1e;
+  --card-bg: rgba(25, 20, 43, 0.7);
+  --modal-bg: #1e1633;
+  --muted: #a299bc;
+}
+
+/* ─── Page shell ─── */
+
+.sky-page {
+  --glow-x: 50%;
+  --glow-y: 46%;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 1.25rem;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fbfbff;
+  background:
+    radial-gradient(circle at var(--glow-x) var(--glow-y), rgba(255, 119, 233, 0.14), transparent 20rem),
+    radial-gradient(circle at 15% 10%, rgba(218, 182, 25, 0.1), transparent 22rem),
+    linear-gradient(140deg, #080415 0%, #17113e 48%, #060615 100%);
+}
+
+/* ─── Outer header (above the box) ─── */
+
+.sky-outer-header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: min(1180px, 100%);
+}
+
+.sky-page::before {
+  position: absolute;
+  inset: -18%;
+  z-index: -2;
+  content: "";
+  opacity: 0.7;
+  filter: blur(44px);
+  background:
+    radial-gradient(ellipse at 24% 28%, rgba(255, 119, 233, 0.24), transparent 34%),
+    radial-gradient(ellipse at 80% 18%, rgba(218, 182, 25, 0.16), transparent 30%),
+    radial-gradient(ellipse at 56% 85%, rgba(255, 119, 233, 0.1), transparent 34%);
+  animation: studio-aura 18s ease-in-out infinite alternate;
+}
+
+.sky-page::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(circle at center, rgba(0,0,0,0.6), transparent 72%);
+}
+
+
+@keyframes border-shine {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ─── Top bar ─── */
+
+.sky-studio-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sky-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.4rem;
+  padding: 0.55rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background:
+    linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
+    linear-gradient(270deg, var(--gradient-pink), var(--gradient-yellow), var(--gradient-pink)) border-box;
+  background-size: 200% auto;
+  background-origin: border-box;
+  animation: border-shine 3s linear infinite;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.sky-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255,119,233,0.28);
+}
+
+.sky-actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.sky-action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.4rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.sky-action-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,119,233,0.4);
+  background: rgba(255,119,233,0.08);
+}
+
+.sky-action-fill {
+  border: 2px solid transparent;
+  color: #fff;
+  font-weight: 600;
+  background:
+    linear-gradient(135deg, var(--gradient-pink), var(--gradient-yellow)) padding-box,
+    linear-gradient(135deg, var(--gradient-pink), var(--gradient-yellow)) border-box;
+  box-shadow: 0 0 18px rgba(255,119,233,0.28);
+}
+
+.sky-action-fill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(255,119,233,0.44);
+}
+
+/* ─── Outer header ─── */
+
+.sky-studio-topbar {
+  margin-bottom: 0;
+}
+
+.sky-studio-header {
+  padding: 0 0.1rem;
+}
+
+.sky-studio-header h1 {
+  margin: 0;
+  font-family: "Play", "Inter", system-ui, sans-serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(to right, var(--gradient-yellow), var(--gradient-pink), var(--gradient-yellow));
+  background-size: 200% auto;
+  background-position: 0% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: border-shine 3s linear infinite;
+  filter: drop-shadow(0 0 16px rgba(255,119,233,0.2));
+}
+
+.sky-subtitle {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ─── Main grid ─── */
+
+.sky-studio-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.85fr);
+  gap: 1rem;
+  width: min(1180px, 100%);
+}
+
+/* ─── Controls panel ─── */
+
+.sky-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1.1rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background:
+    linear-gradient(var(--dark-bg), var(--dark-bg)) padding-box,
+    linear-gradient(270deg, var(--gradient-pink), var(--gradient-yellow), var(--gradient-pink)) border-box;
+  background-size: 200% auto;
+  background-origin: border-box;
+  animation: border-shine 4s linear infinite;
+  overflow-y: auto;
+}
+
+.control-group {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.control-section-label {
+  margin: 0;
+  color: var(--gradient-pink);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+/* ─── Select ─── */
+
+.control-group select {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0 0.85rem;
+  border: 1px solid rgba(255,119,233,0.25);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.88rem;
+  background: rgba(15,10,30,0.9);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+
+.control-group select:focus {
+  border-color: rgba(255,119,233,0.55);
+}
+
+/* ─── Toggle list ─── */
+
+.toggle-list {
+  display: grid;
+  gap: 0.48rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+  padding: 0 0.8rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.78);
+  font-size: 0.88rem;
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+  user-select: none;
+}
+
+.toggle-row:hover {
+  background: rgba(255,119,233,0.08);
+  border-color: rgba(255,119,233,0.22);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 42px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.14);
+  transition: background 200ms ease;
+  cursor: pointer;
+}
+
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.7);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: transform 200ms ease;
+}
+
+.toggle-switch input:checked + .toggle-track {
+  background: linear-gradient(135deg, var(--gradient-pink), var(--gradient-yellow));
+  box-shadow: 0 0 10px rgba(255,119,233,0.36);
+}
+
+.toggle-switch input:checked + .toggle-track::after {
+  transform: translateX(18px);
+  background: #fff;
+}
+
+/* ─── Audio player ─── */
+
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: var(--card-bg);
+}
+
+.audio-play-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255,119,233,0.3);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,119,233,0.08);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.audio-play-btn:hover {
+  background: rgba(255,119,233,0.18);
+  border-color: rgba(255,119,233,0.6);
+  transform: scale(1.1);
+}
+
+.audio-track-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.audio-track-name {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audio-track-status {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.audio-volume {
+  flex-shrink: 0;
+  width: 64px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  outline: none;
+  cursor: pointer;
+}
+
+.audio-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--gradient-pink);
+  box-shadow: 0 0 6px rgba(255,119,233,0.5);
+  cursor: pointer;
+}
+
+.audio-volume::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gradient-pink);
+  box-shadow: 0 0 6px rgba(255,119,233,0.5);
+  cursor: pointer;
+}
+
+/* ─── Trace button ─── */
+
+/* ─── Info card ─── */
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(255,119,233,0.2);
+  border-radius: 10px;
+  background: rgba(255,119,233,0.04);
+  animation: fade-in 400ms ease both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.info-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.info-name {
+  margin: 0;
+  font-family: "Play", "Inter", system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--gradient-yellow), var(--gradient-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.info-pronunciation {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.info-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+.info-badge {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(255,119,233,0.3);
+  border-radius: 999px;
+  color: var(--gradient-pink);
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: rgba(255,119,233,0.08);
+}
+
+.info-myth {
+  margin: 0;
+  color: rgba(255,255,255,0.72);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.info-stars-section {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.info-stars-label {
+  margin: 0;
+  color: var(--gradient-yellow);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.info-stars-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.info-stars-list li {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.82);
+  font-size: 0.78rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ─── Sky scene ─── */
+
+.sky-scene-card {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at var(--glow-x) var(--glow-y), rgba(255,119,233,0.1), transparent 18rem) padding-box,
+    radial-gradient(circle at 22% 18%, rgba(255,119,233,0.16), transparent 18rem) padding-box,
+    radial-gradient(circle at 76% 82%, rgba(218,182,25,0.12), transparent 20rem) padding-box,
+    linear-gradient(180deg, #0d1035 0%, #1f1248 54%, #060614 100%) padding-box,
+    linear-gradient(270deg, var(--gradient-pink), var(--gradient-yellow), var(--gradient-pink)) border-box;
+  background-size: auto, auto, auto, auto, 200% auto;
+  animation: border-shine 4s linear infinite;
+}
+
+.sky-scene-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 115%, rgba(218,182,25,0.16), transparent 32rem),
+    linear-gradient(180deg, transparent 65%, rgba(2,1,12,0.28) 100%);
+}
+
+/* ─── Background stars ─── */
+
+.bg-star-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bg-star {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: block;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  opacity: var(--opacity);
+  background: #fff;
+  transform: translate(-50%, -50%);
+  animation: twinkle var(--duration) ease-in-out var(--delay) infinite;
+}
+
+.bg-star:nth-child(5n) {
+  background: #ffe97a;
+  box-shadow: 0 0 6px rgba(218,182,25,0.6);
+}
+
+.bg-star:nth-child(7n) {
+  background: #ffcff8;
+  box-shadow: 0 0 6px rgba(255,119,233,0.5);
+}
+
+/* ─── Soft particles ─── */
+
+.soft-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: block;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  opacity: 0.14;
+  filter: blur(1px);
+  background: rgba(255,119,233,0.5);
+  transform: translate(-50%, -50%);
+  animation: particle-drift var(--duration) ease-in-out var(--delay) infinite;
+}
+
+/* ─── Atmospheric layers ─── */
+
+.aurora-layer {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  opacity: 0.5;
+  filter: blur(36px);
+  background:
+    radial-gradient(ellipse at 30% 28%, rgba(218,182,25,0.12), transparent 34%),
+    radial-gradient(ellipse at 64% 36%, rgba(255,119,233,0.14), transparent 38%),
+    radial-gradient(ellipse at 46% 74%, rgba(218,182,25,0.1), transparent 42%);
+  animation: aurora-breathe 16s ease-in-out infinite alternate;
+}
+
+.moon-glow {
+  position: absolute;
+  top: 8%;
+  right: 7%;
+  width: 130px;
+  aspect-ratio: 1;
+  z-index: 1;
+  border-radius: 50%;
+  opacity: 0.24;
+  filter: blur(8px);
+  background: radial-gradient(circle, rgba(255,255,255,0.85) 0 8%, rgba(218,182,25,0.28) 24%, transparent 68%);
+}
+
+.horizon-glow {
+  position: absolute;
+  right: -8%;
+  bottom: -20%;
+  left: -8%;
+  z-index: 1;
+  height: 36%;
+  opacity: 0.7;
+  filter: blur(24px);
+  background:
+    radial-gradient(ellipse at center, rgba(218,182,25,0.18), transparent 57%),
+    radial-gradient(ellipse at 24% 60%, rgba(255,119,233,0.14), transparent 46%);
+}
+
+/* ─── Constellation SVG lines ─── */
+
+.mythic-figure-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.mythic-figure-layer::before {
+  position: absolute;
+  inset: 7% 10% 3%;
+  content: "";
+  border-radius: 50%;
+  opacity: 0.58;
+  filter: blur(28px);
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(255, 231, 156, 0.18), transparent 42%),
+    radial-gradient(ellipse at 52% 55%, rgba(255, 119, 233, 0.18), transparent 54%),
+    radial-gradient(ellipse at 48% 70%, rgba(162, 216, 255, 0.14), transparent 60%);
+}
+
+.mythic-figure-layer::after {
+  position: absolute;
+  inset: 9% 18% 2%;
+  content: "";
+  opacity: 0.5;
+  filter: blur(18px);
+  background:
+    linear-gradient(180deg, transparent 0 12%, rgba(255,255,255,0.08) 36%, transparent 76%),
+    radial-gradient(ellipse at 50% 60%, rgba(255, 255, 255, 0.12), transparent 58%);
+  mix-blend-mode: screen;
+}
+
+.mythic-figure-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 85%;
+  object-fit: contain;
+  opacity: 0.24;
+  filter:
+    drop-shadow(0 0 22px rgba(255, 119, 233, 0.3))
+    drop-shadow(0 0 42px rgba(218, 182, 25, 0.15))
+    saturate(0.86)
+    brightness(1.05);
+  mix-blend-mode: screen;
+  transform: translate(-1%, 3%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.constellation-lines-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.c-line {
+  stroke: rgba(255, 119, 233, 0.55);
+  stroke-width: 0.3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 1.5px rgba(255,119,233,0.8));
+  animation: line-appear 600ms ease both;
+}
+
+@keyframes line-appear {
+  from { opacity: 0; stroke-dasharray: 200; stroke-dashoffset: 200; }
+  to   { opacity: 1; stroke-dasharray: 200; stroke-dashoffset: 0; }
+}
+
+/* ─── Constellation stars (CSS positioned) ─── */
+
+.constellation-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+
+.c-star {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color, #ffffff);
+  box-shadow:
+    0 0 calc(var(--size) * 1.2) rgba(255, 255, 255, 0.9),
+    0 0 calc(var(--size) * 3) rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  animation: star-pulse 3s ease-in-out infinite;
+}
+
+.c-star:hover,
+.c-star--hovered {
+  transform: translate(-50%, -50%) scale(1.8);
+  box-shadow:
+    0 0 calc(var(--size) * 2) var(--gradient-pink, #ff77e9),
+    0 0 calc(var(--size) * 5) rgba(255,119,233,0.5);
+  z-index: 5;
+}
+
+@keyframes star-pulse {
+  0%, 100% { opacity: 0.88; }
+  50%       { opacity: 1; }
+}
+
+/* ─── Star labels ─── */
+
+.c-star-label {
+  position: absolute;
+  z-index: 5;
+  transform: translate(8px, -18px);
+  color: rgba(255,255,255,0.7);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  text-shadow: 0 0 6px rgba(0,0,0,0.8), 0 0 12px rgba(255,119,233,0.3);
+  white-space: nowrap;
+}
+
+/* ─── Hover tooltip ─── */
+
+.star-tooltip {
+  position: absolute;
+  left: var(--tx);
+  top: var(--ty);
+  z-index: 10;
+  transform: translate(-50%, -130%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255,119,233,0.4);
+  border-radius: 8px;
+  background: rgba(15,10,30,0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 14px rgba(255,119,233,0.14);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: tooltip-pop 180ms ease both;
+}
+
+.star-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 6px;
+  background: rgba(15,10,30,0.92);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+@keyframes tooltip-pop {
+  from { opacity: 0; transform: translate(-50%, -120%); }
+  to   { opacity: 1; transform: translate(-50%, -130%); }
+}
+
+.star-tooltip strong {
+  color: #fff;
+  font-size: 0.88rem;
+}
+
+.star-tooltip span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  max-width: 200px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* ─── Keyframes ─── */
+
+@keyframes twinkle {
+  0%, 100% { opacity: calc(var(--opacity) * 0.5); transform: translate(-50%, -50%) scale(0.75); }
+  45%      { opacity: var(--opacity); transform: translate(-50%, -50%) scale(1.3); }
+  62%      { opacity: calc(var(--opacity) * 0.38); transform: translate(-50%, -50%) scale(0.88); }
+}
+
+@keyframes particle-drift {
+  0%, 100% { transform: translate(-50%, -50%) translate3d(0, 0, 0); }
+  50%      { transform: translate(-50%, -50%) translate3d(18px, -22px, 0); }
+}
+
+@keyframes aurora-breathe {
+  0%   { opacity: 0.38; transform: scale(1); }
+  100% { opacity: 0.62; transform: scale(1.07); }
+}
+
+@keyframes studio-aura {
+  0%   { transform: translate3d(-1%, -1%, 0) scale(1); }
+  100% { transform: translate3d(1%, 1%, 0) scale(1.05); }
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 900px) {
+  .sky-page {
+    overflow-y: auto;
+    padding: 0.75rem;
+  }
+
+  .sky-studio-grid {
+    flex: none;
+    grid-template-columns: 1fr;
+  }
+
+  .sky-scene-card {
+    min-height: 400px;
+  }
+
+  .mythic-figure-image {
+    height: 96%;
+    max-width: 76%;
+    transform: translate(-4%, -2%);
+  }
+
+  .sky-studio-header h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .sky-studio {
+    padding: 0.8rem;
+  }
+
+  .sky-studio-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sky-back {
+    justify-content: center;
+  }
+
+  .sky-actions {
+    justify-content: stretch;
+  }
+
+  .sky-action-button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .sky-studio-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .sky-scene-card {
+    min-height: 320px;
+  }
+
+  .mythic-figure-image {
+    height: 88%;
+    max-width: 84%;
+    transform: translate(-3%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-page *,
+  .sky-page *::before,
+  .sky-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+}
