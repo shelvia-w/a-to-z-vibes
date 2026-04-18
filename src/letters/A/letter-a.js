@@ -159,7 +159,6 @@ export default function LetterA({ onBack }) {
   const [showLines, setShowLines] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const [showArt, setShowArt] = useState(true);
-  const [showMythology, setShowMythology] = useState(true);
   const [hoveredStar, setHoveredStar] = useState(null);
   const [revealedLines, setRevealedLines] = useState(0);
   const [pointer, setPointer] = useState({ x: 50, y: 46 });
@@ -257,7 +256,6 @@ export default function LetterA({ onBack }) {
                 <Toggle label="Constellation Lines" checked={showLines} onChange={(e) => setShowLines(e.target.checked)} />
                 <Toggle label="Star Labels" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} />
                 <Toggle label="Background Art" checked={showArt} onChange={(e) => setShowArt(e.target.checked)} />
-                <Toggle label="Mythology & Facts" checked={showMythology} onChange={(e) => setShowMythology(e.target.checked)} />
               </div>
             </div>
 
@@ -289,27 +287,25 @@ export default function LetterA({ onBack }) {
               />
             </div>
 
-            {showMythology && (
-              <div className="info-card">
-                <div className="info-card-header">
-                  <h2 className="info-name">{constellation.name}</h2>
-                  <p className="info-pronunciation">/{constellation.pronunciation}/</p>
-                  <div className="info-badges">
-                    <span className="info-badge">{constellation.meaning}</span>
-                    <span className="info-badge">{constellation.season}</span>
-                  </div>
-                </div>
-                <p className="info-myth">{constellation.myth}</p>
-                <div className="info-stars-section">
-                  <p className="info-stars-label">Notable Stars</p>
-                  <ul className="info-stars-list">
-                    {constellation.bestStars.map((s) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
+            <div className="info-card">
+              <div className="info-card-header">
+                <h2 className="info-name">{constellation.name}</h2>
+                <p className="info-pronunciation">/{constellation.pronunciation}/</p>
+                <div className="info-badges">
+                  <span className="info-badge">{constellation.meaning}</span>
+                  <span className="info-badge">{constellation.season}</span>
                 </div>
               </div>
-            )}
+              <p className="info-myth">{constellation.myth}</p>
+              <div className="info-stars-section">
+                <p className="info-stars-label">Notable Stars</p>
+                <ul className="info-stars-list">
+                  {constellation.bestStars.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </aside>
 
           <section className="sky-scene-card" aria-label="Interactive constellation view">
