@@ -211,7 +211,29 @@ button {
   animation: shine 3s linear infinite;
 }
 
-.card-coming-soon {
+.card-title {
+  font-family: "Play", sans-serif;
+  font-size: 1.0rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-align: center;
+  margin: 0.35rem 0 0.85rem;
+  background: linear-gradient(
+    to right,
+    var(--gradient-yellow),
+    var(--gradient-pink),
+    var(--gradient-yellow)
+  );
+  background-size: 200% auto;
+  background-position: 0% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+.card-subtitle {
   color: #a299bc;
   font-size: 0.9rem;
 }

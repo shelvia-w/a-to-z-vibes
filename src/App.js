@@ -43,8 +43,8 @@ const Card = ({ letter, onOpenSky }) => {
     return (
       <button className="card card-button" onClick={onOpenSky}>
         <h2 className="card-number">{letter}</h2>
-        <p className="card-coming-soon">A Sky Full of Stars</p>
-        <p className="card-subtitle">Wander through the beauty of the constellations and dance among the stars</p>
+        <p className="card-title">A Sky Full of Stars</p>
+        <p className="card-subtitle">Wander through the beauty of the constellations and dance among the stars.</p>
       </button>
     );
   }
@@ -52,7 +52,7 @@ const Card = ({ letter, onOpenSky }) => {
   return (
     <div className="card">
       <h2 className="card-number">{letter}</h2>
-      <p className="card-coming-soon">Coming soon...</p>
+      <p className="card-subtitle">Coming soon...</p>
     </div>
   );
 };
