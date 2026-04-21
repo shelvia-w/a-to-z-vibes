@@ -15,13 +15,13 @@ const A = {
   hitArrow:   `${PUB}/letters/B/images/hit_arrow.png`,
   belle:      `${PUB}/letters/B/images/Belle.png`,
   beast: {
-    guarded:   `${PUB}/letters/B/images/beast_guarded.png`,
-    softening: `${PUB}/letters/B/images/beast_softening.png`,
+    cold:   `${PUB}/letters/B/images/beast_cold.png`,
+    opening: `${PUB}/letters/B/images/beast_opening.png`,
     warm:      `${PUB}/letters/B/images/beast_warm.png`,
   },
   beast_portrait: {
-    guarded:   `${PUB}/letters/B/images/beast_guarded_portrait.png`,
-    softening: `${PUB}/letters/B/images/beast_softening_portrait.png`,
+    cold:   `${PUB}/letters/B/images/beast_cold_portrait.png`,
+    opening: `${PUB}/letters/B/images/beast_opening_portrait.png`,
     warm:      `${PUB}/letters/B/images/beast_warm_portrait.png`,
   },
   rose: {
@@ -70,7 +70,7 @@ const ROUND_SCHEDULE = [
 ];
 const HIGH_LEVEL_BREAK_MS = 700;
 
-const heartState = p => p < 33 ? 'guarded' : p < 67 ? 'softening' : 'warm';
+const heartState = p => p < 33 ? 'cold' : p < 67 ? 'opening' : 'warm';
 const roundMs    = () => BEAT_MS * ROUND_BEATS;
 const genPat     = n => Array.from({ length: n }, () => DIRS[Math.floor(Math.random() * 4)]);
 const fmtTime    = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -121,14 +121,14 @@ const CrystalHeartMeter = ({ pct }) => {
 const PORTRAIT = 80;
 const ROW_GAP  = 60;
 
-const STATE_ORDER = ['guarded', 'softening', 'warm'];
+const STATE_ORDER = ['cold', 'opening', 'warm'];
 
 const BeastStateList = ({ pct }) => {
   const hs        = heartState(pct);
   const activeIdx = STATE_ORDER.indexOf(hs);
   const rows = [
-    { k: 'guarded',   img: A.beast_portrait.guarded,   name: 'GUARDED' },
-    { k: 'softening', img: A.beast_portrait.softening, name: 'SOFTENING' },
+    { k: 'cold',      img: A.beast_portrait.cold,      name: 'COLD' },
+    { k: 'opening', img: A.beast_portrait.opening, name: 'OPENING UP' },
     { k: 'warm',      img: A.beast_portrait.warm,      name: 'WARM' },
   ];
 
@@ -270,8 +270,8 @@ const LeftPanel = ({ pct }) => (
 // ── RoseProgression ───────────────────────────────────────────────────────────
 const RoseProgression = ({ pct }) => {
   const hs    = heartState(pct);
-  const lvl   = hs === 'guarded' ? 0 : hs === 'softening' ? 1 : 2;
-  const roseI = { guarded: A.rose.dim, softening: A.rose.mid, warm: A.rose.bright };
+  const lvl   = hs === 'cold' ? 0 : hs === 'opening' ? 1 : 2;
+  const roseI = { cold: A.rose.dim, opening: A.rose.mid, warm: A.rose.bright };
   const marks = [{ l: 'BRIGHT', i: 2 }, { l: 'GLOWING', i: 1 }, { l: 'DIM', i: 0 }];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
@@ -279,7 +279,7 @@ const RoseProgression = ({ pct }) => {
       <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.25)', fontSize: 9, letterSpacing: 1 }}>Belle's light grows</div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: 6 }}>
         <div style={{ position: 'relative', height: 160, width: 90 }}>
-          {['guarded', 'softening', 'warm'].map(s => (
+          {['cold', 'opening', 'warm'].map(s => (
             <img key={s} src={roseI[s]} alt="" style={{
               position: 'absolute', bottom: 0, left: 0, height: 160, width: 90, objectFit: 'contain',
               opacity: hs === s ? 1 : 0,
@@ -1204,7 +1204,7 @@ export default function LetterB({ onBack }) {
             background: 'rgba(3,5,16,0.7)', animation: 'introFade 0.8s ease',
           }}>
             <div style={{ fontFamily: 'Cinzel Decorative', color: '#7788aa', fontSize: 50, textShadow: '0 0 40px rgba(100,120,180,0.5)' }}>The Rose Has Faded</div>
-            <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 19, letterSpacing: 4 }}>His heart remained guarded…</div>
+            <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 19, letterSpacing: 4 }}>His heart remained cold…</div>
             <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 28, marginTop: 6 }}>{score.toLocaleString()} pts</div>
             <button
               type="button"
