@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import LetterA from "./letters/A/letter-a";
+import LetterB from "./letters/B/letter-b";
 
 const LETTERS = [
   "A",
@@ -36,15 +37,26 @@ const LETTERS = [
 ];
 
 const SKY_HASH = "#a-sky-full-of-stars";
+const HEART_HASH = "#b-beauty-and-a-beat";
 const logoSrc = `${process.env.PUBLIC_URL}/img/cute_pet_logo.png`;
 
-const Card = ({ letter, onOpenSky }) => {
+const Card = ({ letter, onOpenSky, onOpenHeart }) => {
   if (letter === "A") {
     return (
       <button className="card card-button" onClick={onOpenSky}>
         <h2 className="card-number">{letter}</h2>
         <p className="card-title">A Sky Full of Stars</p>
         <p className="card-subtitle">Wander through the beauty of the constellations and dance among the stars.</p>
+      </button>
+    );
+  }
+
+  if (letter === "B") {
+    return (
+      <button className="card card-button" onClick={onOpenHeart}>
+        <h2 className="card-number">{letter}</h2>
+        <p className="card-title">Beauty and a Beat</p>
+        <p className="card-subtitle">Help Belle melt the Beast's heart through the rhythm of love <br /> (Work in Progress).</p>
       </button>
     );
   }
@@ -194,13 +206,17 @@ const Footer = () => {
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(() =>
-    window.location.hash === SKY_HASH ? "sky" : "home"
-  );
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (window.location.hash === SKY_HASH)   return "sky";
+    if (window.location.hash === HEART_HASH) return "heart";
+    return "home";
+  });
 
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentPage(window.location.hash === SKY_HASH ? "sky" : "home");
+      if (window.location.hash === SKY_HASH)        setCurrentPage("sky");
+      else if (window.location.hash === HEART_HASH) setCurrentPage("heart");
+      else                                           setCurrentPage("home");
     };
 
     window.addEventListener("hashchange", handleHashChange);
@@ -217,8 +233,22 @@ export default function App() {
     setCurrentPage("home");
   };
 
+  const openHeartPage = () => {
+    window.location.hash = HEART_HASH;
+    setCurrentPage("heart");
+  };
+
+  const closeHeartPage = () => {
+    window.location.hash = "";
+    setCurrentPage("home");
+  };
+
   if (currentPage === "sky") {
     return <LetterA onBack={closeSkyPage} />;
+  }
+
+  if (currentPage === "heart") {
+    return <LetterB onBack={closeHeartPage} />;
   }
 
   return (
@@ -243,7 +273,7 @@ export default function App() {
 
       <main className="grid">
         {LETTERS.map((letter) => (
-          <Card key={letter} letter={letter} onOpenSky={openSkyPage} />
+          <Card key={letter} letter={letter} onOpenSky={openSkyPage} onOpenHeart={openHeartPage} />
         ))}
       </main>
 
