@@ -46,7 +46,8 @@ const HUD_ASSET_X_OFFSET = 20;
 const HEART_METER_TITLE_X_OFFSET = 30;
 const HEART_METER_SUBTITLE_X_OFFSET = -50;
 const HEART_METER_X_OFFSET = 50;
-
+const ROSE_PROG_X_OFFSET = 18;
+const SCORE_X_OFFSET = 10;
 
 const DIRS    = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
 const DIR_ROT = { ArrowLeft: 180, ArrowRight: 0, ArrowUp: 270, ArrowDown: 90 };
@@ -247,7 +248,7 @@ const LeftPanel = ({ pct }) => (
     <div style={{ transform: `translateX(${HUD_ASSET_X_OFFSET}px)` }}>
     <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, transform: `translateX(${HEART_METER_TITLE_X_OFFSET}px)` }}>HEART METER</div>
     <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 20, textAlign: 'center', transform: `translateX(${HEART_METER_SUBTITLE_X_OFFSET}px)` }}>
-      Fill the heart<br />to melt his heart
+      Melt his heart
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
       <div style={{ transform: `translateX(-${HEART_METER_X_OFFSET}px)` }}>
@@ -257,7 +258,7 @@ const LeftPanel = ({ pct }) => (
         {Math.round(pct)}%
       </div>
     </div>
-    <img src={A.separator} alt="" style={{ width: '70%', margin: '-15px 0 -20px', objectFit: 'contain' }} />
+    <img src={A.separator} alt="" style={{ width: '70%', margin: '-35px 0 -40px', objectFit: 'contain' }} />
     <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, marginTop: -20, transform: `translateX(${HEART_METER_TITLE_X_OFFSET}px)` }}>BEAST STATE</div>
     <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 40, textAlign: 'center', transform: `translateX(${HEART_METER_SUBTITLE_X_OFFSET}px)` }}>
       Emotional progression
@@ -270,43 +271,23 @@ const LeftPanel = ({ pct }) => (
 // ── RoseProgression ───────────────────────────────────────────────────────────
 const RoseProgression = ({ pct }) => {
   const hs    = heartState(pct);
-  const lvl   = hs === 'cold' ? 0 : hs === 'opening' ? 1 : 2;
-  const roseI = { cold: A.rose.dim, opening: A.rose.mid, warm: A.rose.bright };
-  const marks = [{ l: 'BRIGHT', i: 2 }, { l: 'GLOWING', i: 1 }, { l: 'DIM', i: 0 }];
+const roseI = { cold: A.rose.dim, opening: A.rose.mid, warm: A.rose.bright };
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-      <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 10, letterSpacing: 3 }}>ROSE PROGRESSION</div>
-      <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.25)', fontSize: 9, letterSpacing: 1 }}>Belle's light grows</div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: 6 }}>
-        <div style={{ position: 'relative', height: 160, width: 90 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 20, fontWeight: 600, letterSpacing: 1, marginBottom: 6, transform: `translateX(${ROSE_PROG_X_OFFSET}px)`}}>ENCHANTED ROSE</div>
+      <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 0.5, letterSpacing: 0.2, marginBottom: 40, textAlign: 'center', transform: `translateX(${ROSE_PROG_X_OFFSET}px)` }}>
+        Keep the rose alive
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, marginTop: 10 }}>
+        <div style={{ position: 'relative', height: 330, width: 230 }}>
           {['cold', 'opening', 'warm'].map(s => (
             <img key={s} src={roseI[s]} alt="" style={{
-              position: 'absolute', bottom: 0, left: 0, height: 160, width: 90, objectFit: 'contain',
+              position: 'absolute', bottom: 0, left: 0, height: 420, width: 248, objectFit: 'contain',
               opacity: hs === s ? 1 : 0,
               transition: 'opacity 1.8s ease',
-              filter: s === 'warm' ? 'drop-shadow(0 0 18px rgba(255,200,50,0.5))' : 'none',
+              filter: s === 'warm' ? 'drop-shadow(0 0 24px rgba(255,200,50,0.5))' : 'none',
             }} />
           ))}
-        </div>
-        <div style={{ height: 155, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          {marks.map(m => {
-            const on = lvl >= m.i, cur = lvl === m.i;
-            return (
-              <div key={m.l} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <div style={{
-                  width: 9, height: 9, borderRadius: '50%', flexShrink: 0,
-                  background: cur ? '#ffd700' : on ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.12)',
-                  boxShadow: cur ? '0 0 10px #ffd700' : 'none',
-                  transition: 'all 1.5s ease',
-                }} />
-                <div style={{
-                  fontFamily: 'Cinzel', fontSize: 9, letterSpacing: 2,
-                  color: cur ? '#c9a84c' : on ? 'rgba(201,168,76,0.45)' : 'rgba(255,255,255,0.18)',
-                  fontWeight: cur ? 700 : 400, transition: 'color 1.5s ease',
-                }}>{m.l}</div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>
@@ -320,22 +301,23 @@ const RightPanel = ({ score, combo, pct }) => {
     <div style={{
       position: 'absolute', top: 0, right: 0, width: RW, height: H, zIndex: 12,
       background: 'linear-gradient(270deg,rgba(3,5,16,0.92) 60%,rgba(3,5,16,0) 100%)',
-      padding: '28px 24px 28px 20px',
-      display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
+      padding: '28px 0px 28px 100px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
-      <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 10, letterSpacing: 4, marginBottom: 4 }}>SCORE</div>
-      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 40, fontWeight: 700, lineHeight: 1, textShadow: '0 0 24px rgba(201,168,76,0.5)', textAlign: 'right' }}>
+      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 20, fontWeight: 600, letterSpacing: 1, marginTop: 100, marginBottom: 4, transform: `translateX(${SCORE_X_OFFSET}px)`}}>SCORE</div>
+      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 40, fontWeight: 700, lineHeight: 1, textShadow: '0 0 24px rgba(201,168,76,0.5)', textAlign: 'center', transform: `translateX(${SCORE_X_OFFSET}px)` }}>
         {score.toLocaleString()}
       </div>
       <div style={{ margin: '16px 0 12px' }} />
-      <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 10, letterSpacing: 4, marginBottom: 4 }}>COMBO</div>
+      <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 20, fontWeight: 600, letterSpacing: 1, marginBottom: 4, transform: `translateX(${SCORE_X_OFFSET}px)` }}>COMBO</div>
       <div style={{
-        fontFamily: 'Cinzel', color: '#f5f0e8', fontSize: 46, fontWeight: 700, lineHeight: 1, textAlign: 'right',
+        fontFamily: 'Cinzel', color: '#f5f0e8', fontSize: 46, fontWeight: 700, lineHeight: 1, textAlign: 'center',
         textShadow: combo > 0 ? '0 0 20px rgba(255,255,255,0.3)' : 'none',
         animation: combo > 0 ? 'heartbeat 0.6s ease' : 'none',
+        transform: `translateX(${SCORE_X_OFFSET}px)`
       }}>{combo}</div>
-      {combo > 0 && <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 14, letterSpacing: 2, marginTop: 3 }}>×{mult}</div>}
-      <div style={{ margin: '20px 0 16px' }} />
+      {combo > 0 && <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 14, letterSpacing: 2, marginTop: 3}}>×{mult}</div>}
+      <img src={A.separator} alt="" style={{ width: '90%', margin: '-40px 0 -70px 30px', objectFit: 'contain'}} />
       <RoseProgression pct={pct} />
     </div>
   );
@@ -500,19 +482,12 @@ const FeedbackText = ({ text }) => {
 const BottomPanel = ({ phase, pattern, noteStates, feedback, cursorPos, targetPulse, songElapsed, songDuration, beatDebug, currentLevel }) => {
   const progress = Math.min(1, songElapsed / songDuration);
   const timingActive = false;
-  const beatErrorAbs = Math.abs(beatDebug.nearestBeatErrorMs);
-  const judgments = [
-    { label: 'PERFECT', col: '#ffd700', desc: '+ Great Increase' },
-    { label: 'GREAT',   col: '#c9a84c', desc: '+ Medium Increase' },
-    { label: 'GOOD',    col: '#8899bb', desc: '+ Small Increase' },
-    { label: 'MISS',    col: '#cc3355', desc: 'No Increase · Breaks Combo' },
-  ];
   return (
     <div style={{
       position: 'absolute', bottom: 0, left: 0, right: 0, height: BH, zIndex: 10,
       background: 'linear-gradient(0deg,rgba(2,4,14,0.97) 60%,rgba(2,4,14,0) 100%)',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 54 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 150 }}>
         <SequenceBar
           phase={phase}
           pattern={pattern}
@@ -582,36 +557,10 @@ const BottomPanel = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
       {/* BOTTOM STRIP */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: 64,
-        borderTop: '1px solid rgba(201,168,76,0.12)',
+
         display: 'flex', alignItems: 'center',
         padding: `0 28px 0 ${28 + HUD_ASSET_X_OFFSET}px`,
       }}>
-        {/* Judgment legend */}
-        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          {judgments.map(j => (
-            <div key={j.label} style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-              <span style={{ fontFamily: 'Cinzel', color: j.col, fontSize: 11, letterSpacing: 2, fontWeight: 700 }}>{j.label}</span>
-              <span style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.3)', fontSize: 8, letterSpacing: 1 }}>{j.desc}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', marginLeft: 18 }}>
-          <span style={{ fontFamily: 'Cinzel', color: '#7effe7', fontSize: 10, letterSpacing: 2, fontWeight: 700 }}>87 BPM</span>
-          <span style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.34)', fontSize: 8, letterSpacing: 1 }}>
-            beat {beatDebug.beatIndex}
-          </span>
-          <span style={{
-            fontFamily: 'Cinzel',
-            color: beatErrorAbs < 12 ? 'rgba(126,255,231,0.86)' : beatErrorAbs < 28 ? 'rgba(255,215,0,0.72)' : 'rgba(204,51,85,0.72)',
-            fontSize: 8,
-            letterSpacing: 1,
-          }}>
-            {beatDebug.nearestBeatErrorMs >= 0 ? '+' : ''}{beatDebug.nearestBeatErrorMs.toFixed(1)}ms
-          </span>
-          <span style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.28)', fontSize: 8, letterSpacing: 1 }}>
-            offset {DOWNBEAT_OFFSET_MS}ms
-          </span>
-        </div>
         <div style={{ flex: 1 }} />
         {/* Song progress */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1083,10 +1032,44 @@ export default function LetterB({ onBack }) {
         )}
 
         {/* Beast — crossfade between states */}
+        {screen === 'playing' && (() => {
+          const hs = heartState(heartPct);
+          const states = [
+            { k: 'cold',    src: A.beast.cold },
+            { k: 'opening', src: A.beast.opening },
+            { k: 'warm',    src: A.beast.warm },
+          ];
+          return (
+            <div style={{
+              position: 'absolute',
+              bottom: BH - 20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 520,
+              height: 700,
+              zIndex: 4,
+              pointerEvents: 'none',
+            }}>
+              {states.map(s => (
+                <img key={s.k} src={s.src} alt="" style={{
+                  position: 'absolute', bottom: -100, left: -50,
+                  width: '115%', height: '115%',
+                  objectFit: 'contain', objectPosition: 'bottom center',
+                  mixBlendMode: 'multiply',
+                  opacity: hs === s.k ? 1 : 0,
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+                  maskImage: 'linear-gradient(to bottom, black 90%, transparent 100%)',
+                  transition: 'opacity 2s ease',
+                }} />
+              ))}
+            </div>
+          );
+        })()}
+
         {/* Title bar — playing only */}
         {screen === 'playing' && (
           <div style={{
-            position: 'absolute', top: 0, left: LW, right: RW, height: 88, zIndex: 10,
+            position: 'absolute', top: 20, left: LW, right: RW, height: 88, zIndex: 10,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             background: 'linear-gradient(180deg,rgba(3,5,16,0.88) 0%,rgba(3,5,16,0) 100%)',
           }}>
@@ -1097,7 +1080,7 @@ export default function LetterB({ onBack }) {
               </div>
               <div style={{ width: 60, height: 1, background: 'rgba(201,168,76,0.4)' }} />
             </div>
-            <div style={{ fontFamily: 'Cormorant Garamond', color: 'rgba(201,168,76,0.5)', fontSize: 17, letterSpacing: 8, marginTop: 3 }}>RHYTHM OF LOVE</div>
+            <div style={{ fontFamily: 'Cormorant Garamond', color: 'rgba(201,168,76,0.8)', fontSize: 17, letterSpacing: 8, marginTop: 3 }}>RHYTHM OF LOVE</div>
           </div>
         )}
 
