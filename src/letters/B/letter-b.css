@@ -72,14 +72,15 @@
 
 /* â”€â”€â”€ Game container â”€â”€â”€ */
 .b-page-shell .sky-outer-header {
-  width: min(1020px, 100%);
+  width: min(1180px, 100%);
 }
 
 .b-game-container {
   position: relative;
   flex: 0 0 auto;
-  width: min(1020px, 100%);
-  aspect-ratio: 1935 / 1080;
+  width: min(1180px, 100%);
+  aspect-ratio: 16 / 9;
+  max-height: calc(100svh - 12rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,6 +95,18 @@
   background-size: auto, 200% auto;
   background-origin: border-box;
   animation: b-border-shine 4s linear infinite;
+}
+
+@media (max-width: 900px) {
+  .b-game-container {
+    max-height: calc(100svh - 9rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .b-game-container {
+    max-height: calc(100svh - 7rem);
+  }
 }
 
 .b-game-container:fullscreen {

@@ -1,0 +1,172 @@
+.landscape-only-project {
+  display: contents;
+}
+
+.landscape-only-content {
+  display: contents;
+}
+
+.rotate-phone-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .sky-page.landscape-project-page {
+    overflow: hidden;
+  }
+
+  .landscape-only-content {
+    display: none;
+  }
+
+  .rotate-phone-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+    overflow: hidden;
+    color: #fbfbff;
+    background:
+      radial-gradient(circle at 22% 18%, rgba(255, 119, 233, 0.22), transparent 18rem),
+      radial-gradient(circle at 82% 78%, rgba(218, 182, 25, 0.12), transparent 20rem),
+      linear-gradient(145deg, #070414 0%, #16103a 50%, #030612 100%);
+    isolation: isolate;
+  }
+
+  .rotate-phone-overlay::before {
+    position: absolute;
+    inset: -20%;
+    z-index: -1;
+    content: "";
+    opacity: 0.65;
+    filter: blur(42px);
+    background:
+      radial-gradient(ellipse at 24% 30%, rgba(255, 119, 233, 0.26), transparent 34%),
+      radial-gradient(ellipse at 76% 18%, rgba(130, 180, 255, 0.16), transparent 32%),
+      radial-gradient(ellipse at 56% 86%, rgba(218, 182, 25, 0.14), transparent 36%);
+  }
+
+  .rotate-phone-overlay::after {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: "";
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(circle at center, rgba(0,0,0,0.6), transparent 72%);
+  }
+
+  .rotate-back {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    left: max(1rem, env(safe-area-inset-left));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.4rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid rgba(255, 170, 230, 0.34);
+    border-radius: 999px;
+    color: rgba(255,255,255,0.88);
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: rgba(12, 8, 28, 0.72);
+    backdrop-filter: blur(14px);
+    cursor: pointer;
+  }
+
+  .rotate-phone-card {
+    display: flex;
+    width: min(330px, 100%);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .rotate-phone-icon {
+    display: grid;
+    place-items: center;
+    width: 92px;
+    height: 92px;
+    margin-bottom: 0.3rem;
+    border: 1px solid rgba(255, 170, 230, 0.28);
+    border-radius: 24px;
+    color: #ffb8f2;
+    background: rgba(255, 255, 255, 0.055);
+    box-shadow:
+      0 18px 50px rgba(0, 0, 0, 0.42),
+      0 0 28px rgba(255, 119, 233, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px);
+  }
+
+  .rotate-phone-icon svg {
+    width: 58px;
+    height: 58px;
+  }
+
+  .rotate-phone-card h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 2rem;
+    line-height: 1.05;
+  }
+
+  .rotate-phone-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .rotate-phone-card span {
+    color: rgba(218, 182, 25, 0.78);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .sky-page.landscape-project-page {
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .sky-page.landscape-project-page .sky-outer-header {
+    display: none;
+  }
+
+  .landscape-only-project {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .landscape-only-content {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .landscape-only-content > .constellation-shell,
+  .landscape-only-content > .b-game-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .landscape-only-content > .b-game-container {
+    aspect-ratio: auto;
+  }
+}

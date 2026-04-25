@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import LandscapeOnlyProject from '../../components/LandscapeOnlyProject';
 import './letter-b.css';
 import '../A/letter-a.css';
 
@@ -89,7 +90,7 @@ const CrystalHeartMeter = ({ pct }) => {
         position: 'absolute', top: 0, left: 0,
         width: HEART_W, height: HEART_H,
         objectFit: 'contain',
-        opacity: 0.12,
+        opacity: 0.22,
         zIndex: 0,
       }} />
       {/* Crystal fill — revealed bottom to top via overflow clip */}
@@ -960,7 +961,7 @@ export default function LetterB({ onBack }) {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <main className="sky-page b-page-shell">
+    <main className="sky-page b-page-shell landscape-project-page">
       <audio
         ref={audioRef}
         src={A.audio}
@@ -982,6 +983,7 @@ export default function LetterB({ onBack }) {
         </div>
       </div>
 
+      <LandscapeOnlyProject onBack={onBack}>
       <div className="b-game-container" ref={containerRef}>
       <img className="b-frame-background" src={screen === 'playing' ? A.backgroundGame : A.background} alt="" />
       <button
@@ -1212,6 +1214,7 @@ export default function LetterB({ onBack }) {
 
       </div>
       </div>
+      </LandscapeOnlyProject>
     </main>
   );
 }

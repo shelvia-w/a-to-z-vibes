@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import LandscapeOnlyProject from "../../components/LandscapeOnlyProject";
 import "./letter-a.css";
 
 const CONSTELLATIONS = [
@@ -140,18 +141,53 @@ const makeParticles = () =>
     duration: 16 + Math.random() * 14,
   }));
 
-const Toggle = ({ checked, onChange, label }) => (
-  <label className="toggle-row">
-    <span>{label}</span>
-    <span className="toggle-switch">
+const CARD_SLOTS = [
+  { name: "lower-left",  x1: 0, x2: 26, y1: 48, y2: 92 },
+  { name: "left-center", x1: 0, x2: 26, y1: 18, y2: 68 },
+  { name: "upper-left",  x1: 0, x2: 26, y1: 2,  y2: 46 },
+  { name: "lower-right", x1: 74, x2: 100, y1: 48, y2: 92 },
+  { name: "upper-right", x1: 74, x2: 100, y1: 2,  y2: 46 },
+];
+
+const STAR_PAD = 6;
+
+function computeCardPlacement(stars) {
+  let bestSlot = CARD_SLOTS[0].name;
+  let bestScore = Infinity;
+
+  for (const slot of CARD_SLOTS) {
+    let score = 0;
+    for (const s of stars) {
+      if (
+        s.x + STAR_PAD > slot.x1 && s.x - STAR_PAD < slot.x2 &&
+        s.y + STAR_PAD > slot.y1 && s.y - STAR_PAD < slot.y2
+      ) {
+        score++;
+      }
+    }
+    if (score < bestScore) {
+      bestScore = score;
+      bestSlot = slot.name;
+      if (score === 0) break;
+    }
+  }
+
+  return bestSlot;
+}
+
+const ToolbarToggle = ({ checked, onChange, label }) => (
+  <label className="toolbar-toggle">
+    <span className="toolbar-toggle-switch">
       <input type="checkbox" checked={checked} onChange={onChange} />
-      <span className="toggle-track" />
+      <span className="toolbar-toggle-track" />
     </span>
+    <span className="toolbar-toggle-label">{label}</span>
   </label>
 );
 
 export default function LetterA({ onBack }) {
   const audioRef = useRef(null);
+  const shellRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.4);
 
@@ -159,8 +195,10 @@ export default function LetterA({ onBack }) {
   const [showLines, setShowLines] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const [showArt, setShowArt] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
   const [hoveredStar, setHoveredStar] = useState(null);
   const [revealedLines, setRevealedLines] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [pointer, setPointer] = useState({ x: 50, y: 46 });
 
   const bgStars = useMemo(makeBgStars, []);
@@ -172,8 +210,19 @@ export default function LetterA({ onBack }) {
   const leoImageSrc = `${process.env.PUBLIC_URL}/letters/A/images/leo.png`;
   const cygnusImageSrc = `${process.env.PUBLIC_URL}/letters/A/images/cygnus.png`;
   const lyraImageSrc = `${process.env.PUBLIC_URL}/letters/A/images/lyra.png`;
+  const backgroundSrc = `${process.env.PUBLIC_URL}/letters/A/images/background.png`;
 
   const constellation = CONSTELLATIONS.find((c) => c.id === selectedId);
+  const cardPlacement = useMemo(() => computeCardPlacement(constellation.stars), [constellation.stars]);
+
+  const constellationImages = {
+    orion: orionImageSrc,
+    cassiopeia: cassiopeiaImageSrc,
+    "ursa-major": ursamajorImageSrc,
+    leo: leoImageSrc,
+    cygnus: cygnusImageSrc,
+    lyra: lyraImageSrc,
+  };
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -207,6 +256,15 @@ export default function LetterA({ onBack }) {
     };
   }, [constellation.lines, selectedId]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === shellRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
   const handlePointerMove = (event) => {
     setPointer({
       x: (event.clientX / window.innerWidth) * 100,
@@ -214,245 +272,259 @@ export default function LetterA({ onBack }) {
     });
   };
 
+  const toggleFullscreen = () => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    if (document.fullscreenElement === shell) {
+      document.exitFullscreen?.();
+      return;
+    }
+
+    shell.requestFullscreen?.();
+  };
+
   const sceneStyle = {
     "--glow-x": `${pointer.x}%`,
     "--glow-y": `${pointer.y}%`,
   };
 
-
   return (
-    <main className="sky-page" style={sceneStyle} onPointerMove={handlePointerMove}>
+    <main className="sky-page landscape-project-page" style={sceneStyle} onPointerMove={handlePointerMove}>
       <audio ref={audioRef} src={audioSrc} autoPlay loop preload="auto" />
-      <div className="sky-outer-header">
-        <div className="sky-studio-topbar">
-          <button className="sky-back" onClick={onBack}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
-            Back to Home
-          </button>
-        </div>
 
+      <div className="sky-outer-header">
+        <button className="sky-back" onClick={onBack}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+          Back to Home
+        </button>
         <div className="sky-studio-header">
           <h1>A Sky Full of Stars</h1>
-          <p className="sky-subtitle">
-            Select a constellation, trace its shape, and discover the myths written in light.
-          </p>
+          <p className="sky-subtitle">Select a constellation, admire its shape, and uncover the myths behind the stars..</p>
         </div>
       </div>
 
-      <div className="sky-studio-grid">
-          <aside className="sky-controls" aria-label="Constellation controls">
-            <div className="control-group">
-              <p className="control-section-label">Constellation</p>
-              <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
-                {CONSTELLATIONS.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name} — {c.meaning}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="control-group">
-              <p className="control-section-label">Display</p>
-              <div className="toggle-list">
-                <Toggle label="Constellation Lines" checked={showLines} onChange={(e) => setShowLines(e.target.checked)} />
-                <Toggle label="Star Labels" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} />
-                <Toggle label="Background Art" checked={showArt} onChange={(e) => setShowArt(e.target.checked)} />
-              </div>
-            </div>
-
-            <div className="audio-player">
-              <button
-                className="audio-play-btn"
-                onClick={() => setIsPlaying((p) => !p)}
-                aria-label={isPlaying ? "Pause music" : "Play music"}
-              >
-                {isPlaying ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-                )}
-              </button>
-              <div className="audio-track-info">
-                <span className="audio-track-name">Music</span>
-                <span className="audio-track-status">{isPlaying ? "playing" : "paused"}</span>
-              </div>
-              <input
-                type="range"
-                className="audio-volume"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                aria-label="Volume"
-              />
-            </div>
-
-            <div className="info-card">
-              <div className="info-card-header">
-                <h2 className="info-name">{constellation.name}</h2>
-                <p className="info-pronunciation">/{constellation.pronunciation}/</p>
-                <div className="info-badges">
-                  <span className="info-badge">{constellation.meaning}</span>
-                  <span className="info-badge">{constellation.season}</span>
-                </div>
-              </div>
-              <p className="info-myth">{constellation.myth}</p>
-              <div className="info-stars-section">
-                <p className="info-stars-label">Notable Stars</p>
-                <ul className="info-stars-list">
-                  {constellation.bestStars.map((s) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </aside>
-
-          <section className="sky-scene-card" aria-label="Interactive constellation view">
-            <div className="bg-star-field" aria-hidden="true">
-              {bgStars.map((star) => (
-                <span
-                  key={star.id}
-                  className="bg-star"
-                  style={{
-                    "--x": `${star.x}%`,
-                    "--y": `${star.y}%`,
-                    "--size": `${star.size}px`,
-                    "--delay": `${star.delay}s`,
-                    "--duration": `${star.duration}s`,
-                    "--opacity": star.opacity,
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="soft-particles" aria-hidden="true">
-              {particles.map((p) => (
-                <span
-                  key={p.id}
-                  className="particle"
-                  style={{
-                    "--x": `${p.x}%`,
-                    "--y": `${p.y}%`,
-                    "--size": `${p.size}px`,
-                    "--delay": `${p.delay}s`,
-                    "--duration": `${p.duration}s`,
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="moon-glow" aria-hidden="true" />
-            <div className="horizon-glow" aria-hidden="true" />
-            <div className="aurora-layer" aria-hidden="true" />
-
-            {showArt && constellation.id === "orion" && (
-              <div className="mythic-figure-layer" aria-hidden="true">
-                <img src={orionImageSrc} alt="" className="mythic-figure-image" />
-              </div>
-            )}
-
-            {showArt && constellation.id === "cassiopeia" && (
-              <div className="mythic-figure-layer" aria-hidden="true">
-                <img src={cassiopeiaImageSrc} alt="" className="mythic-figure-image" />
-              </div>
-            )}
-
-            {showArt && constellation.id === "ursa-major" && (
-              <div className="mythic-figure-layer" aria-hidden="true">
-                <img src={ursamajorImageSrc} alt="" className="mythic-figure-image" />
-              </div>
-            )}
-
-            {showArt && constellation.id === "leo" && (
-              <div className="mythic-figure-layer" aria-hidden="true">
-                <img src={leoImageSrc} alt="" className="mythic-figure-image" />
-              </div>
-            )}
-
-            {showArt && constellation.id === "cygnus" && (
-              <div className="mythic-figure-layer" aria-hidden="true">
-                <img src={cygnusImageSrc} alt="" className="mythic-figure-image" />
-              </div>
-            )}
-
-            {showArt && constellation.id === "lyra" && (
-              <div className="mythic-figure-layer" aria-hidden="true">
-                <img src={lyraImageSrc} alt="" className="mythic-figure-image" />
-              </div>
-            )}
-
-            {showLines && (
-              <svg
-                className="constellation-lines-svg"
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                {constellation.lines.slice(0, revealedLines).map(([a, b], i) => {
-                  const from = constellation.stars[a];
-                  const to = constellation.stars[b];
-                  return (
-                    <line
-                      key={`${constellation.id}-line-${i}`}
-                      x1={from.x}
-                      y1={from.y}
-                      x2={to.x}
-                      y2={to.y}
-                      className="c-line"
-                    />
-                  );
-                })}
+      <LandscapeOnlyProject onBack={onBack}>
+        <section className="constellation-shell" ref={shellRef} aria-label="Constellation Explorer">
+          <button
+            type="button"
+            className="sky-fullscreen-button"
+            onClick={toggleFullscreen}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M8 3v5H3" /><path d="M21 8h-5V3" /><path d="M3 16h5v5" /><path d="M16 21v-5h5" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 8V3h5" /><path d="M16 3h5v5" /><path d="M21 16v5h-5" /><path d="M8 21H3v-5" />
               </svg>
             )}
+          </button>
 
-            <div className="constellation-stars" aria-label="Constellation stars">
-              {constellation.stars.map((star, i) => (
-                <span
-                  key={`${constellation.id}-star-${i}`}
-                  className={`c-star${hoveredStar === i ? " c-star--hovered" : ""}`}
-                  style={{
-                    "--x": `${star.x}%`,
-                    "--y": `${star.y}%`,
-                    "--size": `${star.size * 2.8}px`,
-                    "--color": star.color || "#ffffff",
-                  }}
-                  onMouseEnter={() => setHoveredStar(i)}
-                  onMouseLeave={() => setHoveredStar(null)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={star.name}
-                />
-              ))}
-            </div>
-
-            {showLabels && constellation.stars.map((star, i) => (
+        {/* Full-bleed scene */}
+        <div className="sky-scene" style={{ "--bg-image": `url(${backgroundSrc})` }}>
+          <div className="bg-star-field" aria-hidden="true">
+            {bgStars.map((star) => (
               <span
-                key={`${constellation.id}-label-${i}`}
-                className="c-star-label"
+                key={star.id}
+                className="bg-star"
                 style={{
-                  left: `${star.x}%`,
-                  top: `${star.y}%`,
+                  "--x": `${star.x}%`,
+                  "--y": `${star.y}%`,
+                  "--size": `${star.size}px`,
+                  "--delay": `${star.delay}s`,
+                  "--duration": `${star.duration}s`,
+                  "--opacity": star.opacity,
                 }}
-              >
-                {star.name}
-              </span>
+              />
             ))}
+          </div>
 
-            {hoveredStar !== null && (
-              <div
-                className="star-tooltip"
+          <div className="soft-particles" aria-hidden="true">
+            {particles.map((p) => (
+              <span
+                key={p.id}
+                className="particle"
                 style={{
-                  "--tx": `${constellation.stars[hoveredStar].x}%`,
-                  "--ty": `${constellation.stars[hoveredStar].y}%`,
+                  "--x": `${p.x}%`,
+                  "--y": `${p.y}%`,
+                  "--size": `${p.size}px`,
+                  "--delay": `${p.delay}s`,
+                  "--duration": `${p.duration}s`,
                 }}
-              >
-                <strong>{constellation.stars[hoveredStar].name}</strong>
-                <span>{constellation.stars[hoveredStar].note}</span>
-              </div>
-            )}
-          </section>
+              />
+            ))}
+          </div>
+
+          <div className="moon-glow" aria-hidden="true" />
+          <div className="horizon-glow" aria-hidden="true" />
+          <div className="aurora-layer" aria-hidden="true" />
+
+          {showArt && constellationImages[constellation.id] && (
+            <div className="mythic-figure-layer" aria-hidden="true">
+              <img src={constellationImages[constellation.id]} alt="" className="mythic-figure-image" />
+            </div>
+          )}
+
+          {showLines && (
+            <svg
+              className="constellation-lines-svg"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {constellation.lines.slice(0, revealedLines).map(([a, b], i) => {
+                const from = constellation.stars[a];
+                const to = constellation.stars[b];
+                return (
+                  <line
+                    key={`${constellation.id}-line-${i}`}
+                    x1={from.x}
+                    y1={from.y}
+                    x2={to.x}
+                    y2={to.y}
+                    className="c-line"
+                  />
+                );
+              })}
+            </svg>
+          )}
+
+          <div className="constellation-stars" aria-label="Constellation stars">
+            {constellation.stars.map((star, i) => (
+              <span
+                key={`${constellation.id}-star-${i}`}
+                className={`c-star${hoveredStar === i ? " c-star--hovered" : ""}`}
+                style={{
+                  "--x": `${star.x}%`,
+                  "--y": `${star.y}%`,
+                  "--size": `${star.size * 2.8}px`,
+                  "--color": star.color || "#ffffff",
+                }}
+                onMouseEnter={() => setHoveredStar(i)}
+                onMouseLeave={() => setHoveredStar(null)}
+                role="button"
+                tabIndex={0}
+                aria-label={star.name}
+              />
+            ))}
+          </div>
+
+          {showLabels && constellation.stars.map((star, i) => (
+            <span
+              key={`${constellation.id}-label-${i}`}
+              className="c-star-label"
+              style={{
+                left: `${star.x}%`,
+                top: `${star.y}%`,
+              }}
+            >
+              {star.name}
+            </span>
+          ))}
+
+          {hoveredStar !== null && (
+            <div
+              className="star-tooltip"
+              style={{
+                "--tx": `${constellation.stars[hoveredStar].x}%`,
+                "--ty": `${constellation.stars[hoveredStar].y}%`,
+              }}
+            >
+              <strong>{constellation.stars[hoveredStar].name}</strong>
+              <span>{constellation.stars[hoveredStar].note}</span>
+            </div>
+          )}
         </div>
+
+        {/* Overlay: info card */}
+        <div
+          className={`info-card${showInfo ? " info-card--open" : ""}`}
+          data-placement={cardPlacement}
+        >
+          <div className="info-card-header">
+            <h2 className="info-name">{constellation.name}</h2>
+            <p className="info-pronunciation">/{constellation.pronunciation}/</p>
+            <div className="info-badges">
+              <span className="info-badge">{constellation.meaning}</span>
+              <span className="info-badge info-badge--alt">{constellation.season}</span>
+            </div>
+          </div>
+          <div className="info-card-body">
+            <p className="info-myth">{constellation.myth}</p>
+            <div className="info-stars-section">
+              <p className="info-stars-label">Notable Stars</p>
+              <ul className="info-stars-list">
+                {constellation.bestStars.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Overlay: bottom toolbar */}
+        <div className="sky-toolbar">
+          <div className="toolbar-picker">
+            <svg className="toolbar-picker-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20"/></svg>
+            <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+              {CONSTELLATIONS.map((c) => (
+                <option key={c.id} value={c.id}>{c.name} — {c.meaning}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="toolbar-divider" />
+
+          <div className="toolbar-toggles">
+            <ToolbarToggle label="Lines" checked={showLines} onChange={(e) => setShowLines(e.target.checked)} />
+            <ToolbarToggle label="Labels" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} />
+            <ToolbarToggle label="Art" checked={showArt} onChange={(e) => setShowArt(e.target.checked)} />
+          </div>
+
+          <div className="toolbar-divider" />
+
+          <button
+            className={`toolbar-myth-btn${showInfo ? " toolbar-myth-btn--active" : ""}`}
+            onClick={() => setShowInfo((v) => !v)}
+            aria-label={showInfo ? "Hide mythology" : "Show mythology"}
+            aria-pressed={showInfo}
+          >
+            <svg className="myth-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" /></svg>
+            <span className="myth-btn-label">Myth</span>
+          </button>
+
+          <div className="toolbar-divider" />
+
+          <div className="toolbar-audio">
+            <button
+              className="toolbar-audio-btn"
+              onClick={() => setIsPlaying((p) => !p)}
+              aria-label={isPlaying ? "Pause music" : "Play music"}
+            >
+              {isPlaying ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              ) : (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              )}
+            </button>
+            <input
+              type="range"
+              className="toolbar-volume"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              aria-label="Volume"
+            />
+          </div>
+        </div>
+        </section>
+      </LandscapeOnlyProject>
     </main>
   );
 }
