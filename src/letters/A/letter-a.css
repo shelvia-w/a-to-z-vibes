@@ -1240,6 +1240,13 @@
     max-height: calc(100svh - 7rem);
   }
 
+  .toolbar-picker select {
+    padding: 0.28rem 0.45rem;
+    border-radius: 8px;
+    color: #111827;
+    background: #ffffff;
+  }
+
   .info-card {
     bottom: 4rem;
     left: 0.5rem;
