@@ -41,14 +41,16 @@ const TRACK_BPM = 87;
 const BEAT_MS = 60000 / TRACK_BPM;
 const DOWNBEAT_OFFSET_MS = 0;
 const ROUND_BEATS = 4;
-const W = 1935, H = 1080, LW = 380, RW = 380, BH = 375;
+const W = 1935, H = 1080, LW = 500, RW = 380, BH = 375;
 const OVERLAY_WIDTH_SCALE = 1;
 const HUD_ASSET_X_OFFSET = 20;
 const HEART_METER_TITLE_X_OFFSET = 30;
-const HEART_METER_SUBTITLE_X_OFFSET = -50;
-const HEART_METER_X_OFFSET = 50;
-const ROSE_PROG_X_OFFSET = 18;
-const SCORE_X_OFFSET = 10;
+const HEART_METER_SUBTITLE_X_OFFSET = -110;
+const HEART_METER_X_OFFSET = 100;
+const BEAST_STATE_TITLE_X_OFFSET = 35;
+const BEAST_STATE_SUBTITLE_X_OFFSET = -108;
+const ROSE_PROG_X_OFFSET = 0;
+const SCORE_X_OFFSET = 0;
 
 const DIRS    = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
 const DIR_ROT = { ArrowLeft: 180, ArrowRight: 0, ArrowUp: 270, ArrowDown: 90 };
@@ -259,9 +261,9 @@ const LeftPanel = ({ pct }) => (
         {Math.round(pct)}%
       </div>
     </div>
-    <img src={A.separator} alt="" style={{ width: '70%', margin: '-35px 0 -40px', objectFit: 'contain' }} />
-    <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, marginTop: -20, transform: `translateX(${HEART_METER_TITLE_X_OFFSET}px)` }}>BEAST STATE</div>
-    <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 40, textAlign: 'center', transform: `translateX(${HEART_METER_SUBTITLE_X_OFFSET}px)` }}>
+    <img src={A.separator} alt="" style={{ width: '70%', margin: '-75px -30px -70px', objectFit: 'contain' }} />
+    <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, marginTop: -20, transform: `translateX(${BEAST_STATE_TITLE_X_OFFSET}px)` }}>BEAST STATE</div>
+    <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 40, textAlign: 'center', transform: `translateX(${BEAST_STATE_SUBTITLE_X_OFFSET}px)` }}>
       Emotional progression
     </div>
     <div style={{ transform: 'translateX(20px)' }}><BeastStateList pct={pct} /></div>
@@ -305,7 +307,7 @@ const RightPanel = ({ score, combo, pct }) => {
       padding: '28px 0px 28px 100px',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
-      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 20, fontWeight: 600, letterSpacing: 1, marginTop: 100, marginBottom: 4, transform: `translateX(${SCORE_X_OFFSET}px)`}}>SCORE</div>
+      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 20, fontWeight: 600, letterSpacing: 1, marginTop: 80, marginBottom: 4, transform: `translateX(${SCORE_X_OFFSET}px)`}}>SCORE</div>
       <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 40, fontWeight: 700, lineHeight: 1, textShadow: '0 0 24px rgba(201,168,76,0.5)', textAlign: 'center', transform: `translateX(${SCORE_X_OFFSET}px)` }}>
         {score.toLocaleString()}
       </div>
@@ -317,8 +319,17 @@ const RightPanel = ({ score, combo, pct }) => {
         animation: combo > 0 ? 'heartbeat 0.6s ease' : 'none',
         transform: `translateX(${SCORE_X_OFFSET}px)`
       }}>{combo}</div>
-      {combo > 0 && <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 14, letterSpacing: 2, marginTop: 3}}>×{mult}</div>}
-      <img src={A.separator} alt="" style={{ width: '90%', margin: '-40px 0 -70px 30px', objectFit: 'contain'}} />
+      <div style={{
+        height: 18,
+        marginTop: 3,
+        fontFamily: 'Cinzel',
+        color: '#c9a84c',
+        fontSize: 14,
+        letterSpacing: 2,
+        lineHeight: '18px',
+        opacity: combo > 0 ? 1 : 0,
+      }}>×{mult}</div>
+      <img src={A.separator} alt="" style={{ width: '90%', margin: '-70px 0 -60px -10px', objectFit: 'contain'}} />
       <RoseProgression pct={pct} />
     </div>
   );
