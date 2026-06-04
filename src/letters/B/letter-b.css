@@ -346,11 +346,23 @@
   }
 
   .b-mobile-arrow {
+    position: relative;
     width: 98px;
     height: 98px;
     border-radius: 50%;
     font-size: 40px;
     line-height: 1;
+  }
+
+  .b-mobile-arrow::before {
+    content: "";
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+  }
+
+  .b-mobile-arrow-up::before {
+    inset: -28px -18px -14px;
   }
 
   .b-mobile-arrow-up { grid-area: up; }
