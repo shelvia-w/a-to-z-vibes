@@ -17,6 +17,13 @@
   }
 }
 
+@media (pointer: coarse) {
+  .landscape-only-content .sky-fullscreen-button,
+  .landscape-only-content .b-fullscreen-button {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) and (orientation: portrait) {
   .sky-page.landscape-project-page {
     overflow: hidden;

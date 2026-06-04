@@ -12,8 +12,10 @@ const A = {
   title:      `${PUB}/letters/B/images/title.png`,
   start:      `${PUB}/letters/B/images/start.png`,
   playAgain:  `${PUB}/letters/B/images/play_again.png`,
+  tutorial:   `${PUB}/letters/B/images/tutorial.png`,
   baseArrow:  `${PUB}/letters/B/images/base_arrow.png`,
   hitArrow:   `${PUB}/letters/B/images/hit_arrow.png`,
+  bar:        `${PUB}/letters/B/images/bar.png`,
   belle:      `${PUB}/letters/B/images/Belle.png`,
   beast: {
     cold:   `${PUB}/letters/B/images/beast_cold.png`,
@@ -41,7 +43,7 @@ const TRACK_BPM = 87;
 const BEAT_MS = 60000 / TRACK_BPM;
 const DOWNBEAT_OFFSET_MS = 0;
 const ROUND_BEATS = 4;
-const W = 1935, H = 1080, LW = 500, RW = 380, BH = 375;
+const W = 1935, H = 1080, LW = 500, RW = 380, BH = 310;
 const OVERLAY_WIDTH_SCALE = 1;
 const HUD_ASSET_X_OFFSET = 20;
 const HEART_METER_TITLE_X_OFFSET = 30;
@@ -51,6 +53,8 @@ const BEAST_STATE_TITLE_X_OFFSET = 35;
 const BEAST_STATE_SUBTITLE_X_OFFSET = -108;
 const ROSE_PROG_X_OFFSET = 0;
 const SCORE_X_OFFSET = 0;
+const LEFT_PANEL_H = 900;
+const RIGHT_PANEL_H = 900;
 
 const DIRS    = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
 const DIR_ROT = { ArrowLeft: 180, ArrowRight: 0, ArrowUp: 270, ArrowDown: 90 };
@@ -60,8 +64,10 @@ const TARGET_ZONE_WIDTH = 0.30;
 const PERFECT_WINDOW = 0.025;
 const GREAT_WINDOW = 0.055;
 const GOOD_WINDOW = TARGET_ZONE_WIDTH / 2;
-const HEART_DECAY_PER_SECOND = 0.65;
+const HEART_DECAY_PER_SECOND = 0.38;
 const HEART_DECAY_TICK_MS = 250;
+const LEVEL_REWARD_STEP = 0.12;
+const LEVEL_REWARD_BASELINE = 6;
 const ROUND_SCHEDULE = [
   1, 2, 3,
   4, 4, 4,
@@ -81,31 +87,47 @@ const fmtTime    = ms => { const s = Math.floor(ms / 1000); return `${Math.floor
 const audioMs    = audio => (audio?.currentTime || 0) * 1000;
 
 // ── CrystalHeartMeter ─────────────────────────────────────────────────────────
-const HEART_W = 200, HEART_H = 185;
+const HEART_H = 185;
+const HEART_FRAME_W = HEART_H * (782 / 812);
+const HEART_CRYSTAL_W = HEART_H * (590 / 812);
+const HEART_CRYSTAL_SCALE = 1.1;
+const HEART_CRYSTAL_X = -5;
+const HEART_CRYSTAL_Y = -10;
+const HEART_CRYSTAL_VISIBLE_TOP = 183 / 812;
+const HEART_CRYSTAL_VISIBLE_BOTTOM = 630 / 812;
 
 const CrystalHeartMeter = ({ pct }) => {
-  const fillH = HEART_H * pct / 100;
+  const visibleHeight = HEART_CRYSTAL_VISIBLE_BOTTOM - HEART_CRYSTAL_VISIBLE_TOP;
+  const fillTop = (HEART_CRYSTAL_VISIBLE_BOTTOM - visibleHeight * (pct / 100)) * 100;
+  const fillBottom = (1 - HEART_CRYSTAL_VISIBLE_BOTTOM) * 100;
   return (
-    <div style={{ position: 'relative', width: HEART_W, height: HEART_H }}>
+    <div style={{ position: 'relative', width: HEART_FRAME_W, height: HEART_H }}>
       {/* Dim unfilled crystal hint */}
       <img src={A.heartCrystal} alt="" style={{
-        position: 'absolute', top: 0, left: 0,
-        width: HEART_W, height: HEART_H,
+        position: 'absolute', top: HEART_CRYSTAL_Y, left: `calc(50% + ${HEART_CRYSTAL_X}px)`,
+        width: HEART_CRYSTAL_W * HEART_CRYSTAL_SCALE,
+        height: HEART_H * HEART_CRYSTAL_SCALE,
         objectFit: 'contain',
+        transform: 'translateX(-50%)',
         opacity: 0.22,
         zIndex: 0,
       }} />
       {/* Crystal fill — revealed bottom to top via overflow clip */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0,
-        width: HEART_W, height: fillH,
-        overflow: 'hidden',
-        transition: 'height 0.6s ease',
+        position: 'absolute',
+        top: HEART_CRYSTAL_Y,
+        left: `calc(50% + ${HEART_CRYSTAL_X}px)`,
+        width: HEART_CRYSTAL_W * HEART_CRYSTAL_SCALE,
+        height: HEART_H * HEART_CRYSTAL_SCALE,
+        clipPath: `inset(${fillTop}% 0 ${fillBottom}% 0)`,
+        transition: 'clip-path 0.6s ease',
+        transform: 'translateX(-50%)',
         zIndex: 1,
       }}>
         <img src={A.heartCrystal} alt="" style={{
-          position: 'absolute', bottom: 0, left: 0,
-          width: HEART_W, height: HEART_H,
+          position: 'absolute', inset: 0,
+          width: '100%',
+          height: '100%',
           objectFit: 'contain',
           filter: 'drop-shadow(0 0 10px rgba(180,120,255,0.55))',
         }} />
@@ -113,7 +135,7 @@ const CrystalHeartMeter = ({ pct }) => {
       {/* Gold frame — always full opacity on top */}
       <img src={A.heartFrame} alt="" style={{
         position: 'absolute', top: 0, left: 0,
-        width: HEART_W, height: HEART_H,
+        width: HEART_FRAME_W, height: HEART_H,
         objectFit: 'contain',
         zIndex: 2,
       }} />
@@ -242,28 +264,28 @@ const BeastStateList = ({ pct }) => {
 
 // ── LeftPanel ─────────────────────────────────────────────────────────────────
 const LeftPanel = ({ pct }) => (
-  <div style={{
-    position: 'absolute', top: 0, left: 0, width: LW, height: H, zIndex: 12,
+  <div className="b-left-panel" style={{
+    position: 'absolute', top: 0, left: 0, width: LW, height: LEFT_PANEL_H, zIndex: 12,
     background: 'linear-gradient(90deg,rgba(3,5,16,0.92) 60%,rgba(3,5,16,0) 100%)',
     padding: '50px 20px 28px 24px',
     display: 'flex', flexDirection: 'column',
   }}>
-    <div style={{ transform: `translateX(${HUD_ASSET_X_OFFSET}px)` }}>
-    <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, transform: `translateX(${HEART_METER_TITLE_X_OFFSET}px)` }}>HEART METER</div>
-    <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 20, textAlign: 'center', transform: `translateX(${HEART_METER_SUBTITLE_X_OFFSET}px)` }}>
+    <div className="b-left-panel-content" style={{ transform: `translateX(${HUD_ASSET_X_OFFSET}px)` }}>
+    <div className="b-heart-meter-title" style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, transform: `translateX(${HEART_METER_TITLE_X_OFFSET}px)` }}>HEART METER</div>
+    <div className="b-left-panel-subtitle" style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 20, textAlign: 'center', transform: `translateX(${HEART_METER_SUBTITLE_X_OFFSET}px)` }}>
       Melt his heart
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-      <div style={{ transform: `translateX(-${HEART_METER_X_OFFSET}px)` }}>
+      <div className="b-heart-meter-image" style={{ transform: `translateX(-${HEART_METER_X_OFFSET}px)` }}>
         <CrystalHeartMeter pct={pct} />
       </div>
-      <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 32, fontWeight: 700, textShadow: '0 0 20px rgba(201,168,76,0.5)', lineHeight: 1, marginTop: 8, transform: `translateX(-${HEART_METER_X_OFFSET}px)` }}>
+      <div className="b-heart-meter-percent" style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 32, fontWeight: 700, textShadow: '0 0 20px rgba(201,168,76,0.5)', lineHeight: 1, marginTop: 8, transform: `translateX(-${HEART_METER_X_OFFSET}px)` }}>
         {Math.round(pct)}%
       </div>
     </div>
     <img src={A.separator} alt="" style={{ width: '70%', margin: '-75px -30px -70px', objectFit: 'contain' }} />
-    <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, marginTop: -20, transform: `translateX(${BEAST_STATE_TITLE_X_OFFSET}px)` }}>BEAST STATE</div>
-    <div style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 40, textAlign: 'center', transform: `translateX(${BEAST_STATE_SUBTITLE_X_OFFSET}px)` }}>
+    <div className="b-beast-state-title" style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 25, fontWeight: 600, letterSpacing: 1, marginBottom: 5, marginTop: -20, transform: `translateX(${BEAST_STATE_TITLE_X_OFFSET}px)` }}>BEAST STATE</div>
+    <div className="b-left-panel-subtitle" style={{ fontFamily: 'Winsel Norm Regular', color: 'rgba(210,195,165,0.72)', fontSize: 18, fontWeight: 100, lineHeight: 1.3, letterSpacing: 0.2, marginBottom: 40, textAlign: 'center', transform: `translateX(${BEAST_STATE_SUBTITLE_X_OFFSET}px)` }}>
       Emotional progression
     </div>
     <div style={{ transform: 'translateX(20px)' }}><BeastStateList pct={pct} /></div>
@@ -301,8 +323,8 @@ const roseI = { cold: A.rose.dim, opening: A.rose.mid, warm: A.rose.bright };
 const RightPanel = ({ score, combo, pct }) => {
   const mult = (1 + Math.min(combo, 100) * 0.002).toFixed(2);
   return (
-    <div style={{
-      position: 'absolute', top: 0, right: 0, width: RW, height: H, zIndex: 12,
+    <div className="b-right-panel" style={{
+      position: 'absolute', top: 0, right: 0, width: RW, height: RIGHT_PANEL_H, zIndex: 12,
       background: 'linear-gradient(270deg,rgba(3,5,16,0.92) 60%,rgba(3,5,16,0) 100%)',
       padding: '28px 0px 28px 100px',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -389,10 +411,19 @@ const TimingBar = ({ active, pos }) => (
 );
 
 // ── FeedbackText ──────────────────────────────────────────────────────────────
+const SEQUENCE_BAR_W = 360;
+const SEQUENCE_BAR_H = 50;
+const SEQUENCE_TRACK_LEFT = 44;
+const SEQUENCE_TRACK_RIGHT = 312;
+const SEQUENCE_TRACK_W = SEQUENCE_TRACK_RIGHT - SEQUENCE_TRACK_LEFT;
+const SEQUENCE_BAR_X = 28;
+const SEQUENCE_ARROWS_X = -70;
+const sequenceTrackX = pos => SEQUENCE_TRACK_LEFT + SEQUENCE_TRACK_W * pos;
+
 const SequenceBar = ({ phase, pattern, noteStates, feedback, cursorPos, targetPulse, currentLevel }) => (
-  <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 900, height: 136 }}>
+  <div className="b-sequence-cluster" style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 900, height: 136 }}>
     <div style={{
-      position: 'absolute', top: -15, left: 130, zIndex: 6,
+      position: 'absolute', top: -15, left: 130 + SEQUENCE_BAR_X, zIndex: 6,
       fontFamily: 'Cinzel', fontSize: 20, fontWeight: 800, letterSpacing: 2,
       color: '#ffe875',
       textShadow: '0 0 10px rgba(255,232,117,0.7), 0 0 20px rgba(255,232,117,0.28)',
@@ -409,19 +440,24 @@ const SequenceBar = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
       </div>
     )}
     <div style={{
-      position: 'absolute', top: -15, left: '50%',
-      width: 360, height: 35, borderRadius: 14,
+      position: 'absolute', top: -25, left: `calc(50% + ${SEQUENCE_BAR_X}px)`,
+      width: SEQUENCE_BAR_W, height: SEQUENCE_BAR_H,
       transform: 'translateX(-50%)',
-      background: 'linear-gradient(180deg, rgba(15,20,30,0.86), rgba(3,6,15,0.72))',
-      border: '2px solid rgba(190,210,170,0.34)',
-      boxShadow: 'inset 0 0 10px rgba(255,255,255,0.09), 0 0 14px rgba(0,0,0,0.42)',
-      overflow: 'hidden',
       zIndex: 4,
     }}>
+      <img src={A.bar} alt="" style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'fill',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
       <div style={{
           position: 'absolute',
-          left: 16,
-          right: 16,
+          left: SEQUENCE_TRACK_LEFT,
+          width: SEQUENCE_TRACK_W,
           top: '50%',
           height: 12,
           transform: 'translateY(-50%)',
@@ -431,12 +467,13 @@ const SequenceBar = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
       <div style={{
           position: 'absolute',
           top: '50%',
-          left: `${TARGET_CENTER * 100}%`,
+          left: sequenceTrackX(TARGET_CENTER),
           width: 100,
           height: 20,
           transform: `translate(-50%, -50%) scaleX(${targetPulse ? 1.5 : 1})`,
           transformOrigin: 'center center',
-          background: 'linear-gradient(90deg, rgba(17,247,204,0.34) 0%, rgba(17,247,204,0.58) 12%, rgba(105,255,232,0.88) 24%, rgba(255,255,255,0.98) 36%, rgba(255,255,255,0.98) 64%, rgba(105,255,232,0.88) 76%, rgba(17,247,204,0.58) 88%, rgba(17,247,204,0.34) 100%)',
+          background: 'linear-gradient(90deg, rgba(255,176,209,0.34) 0%, rgba(255,198,221,0.68) 18%, rgba(255,236,244,0.96) 36%, rgba(255,255,255,1) 50%, rgba(255,236,244,0.96) 64%, rgba(255,198,221,0.68) 82%, rgba(255,176,209,0.34) 100%)',
+          boxShadow: '0 0 12px rgba(255,221,234,0.55), 0 0 22px rgba(255,157,199,0.38)',
           animation: 'targetBlink 0.69s ease-in-out infinite',
           transition: 'transform 0.12s ease-out',
           zIndex: 4,
@@ -444,12 +481,12 @@ const SequenceBar = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
       />
       {(phase === 'input' || phase === 'timing') && (
         <div style={{
-          position: 'absolute', top: '50%', left: `${cursorPos * 100}%`,
+          position: 'absolute', top: '50%', left: sequenceTrackX(cursorPos),
           width: 20, height: 20, borderRadius: '50%',
-          background: 'radial-gradient(circle at 35% 30%, #fff4cc, #ff7b45 48%, #8b2318 100%)',
-          border: '2px solid rgba(255,226,186,0.96)',
+          background: 'radial-gradient(circle, #fff6b8 0%, #ffb43b 45%, #d96a1f 100%)',
+          border: '2px solid rgba(255,199,92,0.96)',
           transform: 'translate(-50%, -50%)',
-          boxShadow: '0 0 12px rgba(255,102,61,0.9), 0 0 22px rgba(255,244,214,0.42)',
+          boxShadow: '0 0 10px #ffb43b, 0 0 22px #ff6a3d',
           zIndex: 5,
         }} />
       )}
@@ -459,9 +496,14 @@ const SequenceBar = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
       height: 92,
     }}>
       <div style={{
-        position: 'absolute', inset: 0, zIndex: 2,
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: `calc(50% + ${SEQUENCE_BAR_X + SEQUENCE_ARROWS_X}px)`,
+        transform: 'translateX(-50%)',
+        zIndex: 2,
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0,
-        padding: '0 96px',
+        width: 'max-content',
       }}>
         {(phase === 'input' || phase === 'timing') && pattern.map((dir, i) => (
           <ArrowNote key={i} dir={dir} state={noteStates[i] || 'pending'} />
@@ -474,15 +516,15 @@ const SequenceBar = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
 const FeedbackText = ({ text }) => {
   if (!text) return <div style={{ height: 48 }} />;
   const cfg = {
-    Perfect: { col: '#ffd700', size: 44, label: '◆ PERFECT ◆' },
-    Great:   { col: '#c9a84c', size: 36, label: 'GREAT' },
-    Good:    { col: '#8899bb', size: 32, label: 'GOOD' },
-    Miss:    { col: '#cc3355', size: 32, label: 'MISS' },
+    Perfect: { col: '#ffd700', size: 44, label: 'PERFECT' },
+    Great:   { col: '#8899bb', size: 36, label: 'GREAT' },
+    Good:    { col: '#7ec07e', size: 32, label: 'GOOD' },
+    Miss:    { col: '#ca4f6a', size: 32, label: 'MISS' },
   };
   const c = cfg[text] || cfg.Good;
   return (
     <div style={{
-      fontFamily: 'Cinzel Decorative', color: c.col, fontSize: c.size, fontWeight: 700,
+      fontFamily: 'Alegreya', color: c.col, fontSize: c.size, fontWeight: 700,
       letterSpacing: 4, textShadow: `0 0 30px ${c.col},0 0 60px ${c.col}55`,
       animation: 'fadeUp 1s ease forwards', pointerEvents: 'none',
       whiteSpace: 'nowrap', textAlign: 'center', minHeight: 48,
@@ -491,15 +533,54 @@ const FeedbackText = ({ text }) => {
 };
 
 // ── BottomPanel ───────────────────────────────────────────────────────────────
-const BottomPanel = ({ phase, pattern, noteStates, feedback, cursorPos, targetPulse, songElapsed, songDuration, beatDebug, currentLevel }) => {
+const MobileGameControls = ({ onArrowInput, onSpaceInput }) => {
+  const arrowButton = (dir, label, area) => (
+    <button
+      key={dir}
+      type="button"
+      className={`b-mobile-arrow b-mobile-arrow-${area}`}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        onArrowInput(dir);
+      }}
+      aria-label={dir.replace('Arrow', '')}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="b-mobile-controls">
+      <div className="b-mobile-dpad" aria-label="Arrow controls">
+        {arrowButton('ArrowUp', '↑', 'up')}
+        {arrowButton('ArrowLeft', '←', 'left')}
+        {arrowButton('ArrowRight', '→', 'right')}
+        {arrowButton('ArrowDown', '↓', 'down')}
+      </div>
+      <button
+        type="button"
+        className="b-mobile-space"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          onSpaceInput();
+        }}
+        aria-label="Space"
+      >
+        SPACE
+      </button>
+    </div>
+  );
+};
+
+const BottomPanel = ({ phase, pattern, noteStates, feedback, cursorPos, targetPulse, songElapsed, songDuration, beatDebug, currentLevel, onArrowInput, onSpaceInput }) => {
   const progress = Math.min(1, songElapsed / songDuration);
   const timingActive = false;
   return (
-    <div style={{
+    <div className="b-bottom-panel" style={{
       position: 'absolute', bottom: 0, left: 0, right: 0, height: BH, zIndex: 10,
       background: 'linear-gradient(0deg,rgba(2,4,14,0.97) 60%,rgba(2,4,14,0) 100%)',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 150 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 140 }}>
         <SequenceBar
           phase={phase}
           pattern={pattern}
@@ -566,25 +647,108 @@ const BottomPanel = ({ phase, pattern, noteStates, feedback, cursorPos, targetPu
         <TimingBar active={timingActive} pos={cursorPos} />
       </div>
 
-      {/* BOTTOM STRIP */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: 64,
+      <MobileGameControls onArrowInput={onArrowInput} onSpaceInput={onSpaceInput} />
 
-        display: 'flex', alignItems: 'center',
-        padding: `0 28px 0 ${28 + HUD_ASSET_X_OFFSET}px`,
+      {/* Instructions */}
+      <div className="b-bottom-instructions" style={{
+        position: 'absolute',
+        left: 44,
+        bottom: 30,
+        width: 400,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
       }}>
-        <div style={{ flex: 1 }} />
-        {/* Song progress */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.4)', fontSize: 10, letterSpacing: 2 }}>{fmtTime(songElapsed)}</div>
-          <div style={{ position: 'relative', width: 200, height: 4 }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(201,168,76,0.15)', borderRadius: 2 }} />
-            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${progress * 100}%`, background: 'linear-gradient(90deg,#5566aa,#c9a84c)', borderRadius: 2, transition: 'width 0.12s linear' }} />
-            <div style={{ position: 'absolute', top: '50%', left: `${progress * 100}%`, transform: 'translate(-50%,-50%)', width: 8, height: 8, borderRadius: '50%', background: '#c9a84c', boxShadow: '0 0 8px #c9a84c' }} />
-          </div>
-          <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.4)', fontSize: 10, letterSpacing: 2 }}>{fmtTime(songDuration)}</div>
-          <img src={A.rose.bright} alt="" style={{ height: 28, objectFit: 'contain', opacity: 0.7, filter: 'saturate(0.7)' }} />
-          <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.35)', fontSize: 10, letterSpacing: 3, marginLeft: 4 }}>SONG PROGRESS</div>
+        <div style={{
+          fontFamily: 'Cinzel',
+          color: '#c9a84c',
+          fontSize: 20,
+          fontWeight: 600,
+          letterSpacing: 1,
+          textShadow: '0 0 16px rgba(201,168,76,0.35)',
+        }}>Instructions</div>
+        <ol style={{
+          fontFamily: 'Cinzel',
+          color: 'rgba(245,240,232,0.62)',
+          fontSize: 13,
+          lineHeight: 1.55,
+          letterSpacing: 1,
+          margin: 0,
+          paddingLeft: 18,
+        }}>
+          <li>Match the arrow sequence.</li>
+          <li>Press Space when the golden marker nears the glowing hit area.</li>
+          <li>For Perfect, press Space when the marker is as near to the center glow as possible.</li>
+        </ol>
+      </div>
+
+      {/* Song progress */}
+      <div className="b-song-progress" style={{
+        position: 'absolute',
+        right: 44,
+        bottom: 40,
+        width: 430,
+        height: 138,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 18,
+      }}>
+        <div style={{
+          fontFamily: 'Cinzel',
+          color: '#c9a84c',
+          fontSize: 20,
+          fontWeight: 600,
+          letterSpacing: 1,
+          textShadow: '0 0 16px rgba(201,168,76,0.35)',
+        }}>Song Progress</div>
+        <div style={{ position: 'relative', height: 20 }}>
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: 0,
+            right: 0,
+            height: 2,
+            transform: 'translateY(-50%)',
+            background: 'linear-gradient(90deg, rgba(201,168,76,0.25), rgba(255,194,85,0.9), rgba(201,168,76,0.25))',
+            boxShadow: '0 0 10px rgba(255,180,70,0.55), 0 0 24px rgba(255,133,44,0.18)',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: 0,
+            width: `${progress * 100}%`,
+            height: 2,
+            transform: 'translateY(-50%)',
+            background: 'linear-gradient(90deg,#ff9f3d,#ffe08a)',
+            boxShadow: '0 0 12px rgba(255,180,70,0.78)',
+            transition: 'width 0.12s linear',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: `${progress * 100}%`,
+            width: 9,
+            height: 9,
+            transform: 'translate(-50%, -50%) rotate(45deg)',
+            background: '#fff2b8',
+            border: '1px solid rgba(255,178,66,0.95)',
+            boxShadow: '0 0 10px #ffb43b, 0 0 20px rgba(255,106,61,0.5)',
+            transition: 'left 0.12s linear',
+          }} />
+        </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: 'Cinzel',
+          color: 'rgba(245,240,232,0.58)',
+          fontSize: 15,
+          letterSpacing: 2,
+        }}>
+          <div>{fmtTime(songElapsed)}</div>
+          <div>{Math.round(progress * 100)}%</div>
+          <div>{fmtTime(songDuration)}</div>
         </div>
       </div>
     </div>
@@ -626,6 +790,7 @@ export default function LetterB({ onBack }) {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [stageScale,   setStageScale]   = useState({ x: 1, y: 1 });
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   // Mutable refs — safe to read inside RAF / event callbacks
   const screenRef = useRef('intro');
@@ -743,22 +908,55 @@ export default function LetterB({ onBack }) {
 
   const doFeedback = useCallback((q) => {
     const pts = { Perfect: 300, Great: 200, Good: 80, Miss: 0 }[q];
-    const hd  = { Perfect: 10,  Great: 6,   Good: 2,  Miss: -5 }[q];
+    const hd  = { Perfect: 6,   Great: 3.5, Good: 1,  Miss: -6 }[q];
+    const levelMultiplier = Math.max(0.4, 1 + (currentLevelRef.current - LEVEL_REWARD_BASELINE) * LEVEL_REWARD_STEP);
+    const scoreGain = Math.round(pts * levelMultiplier);
+    const heartGain = hd > 0 ? hd * levelMultiplier : hd;
     setFeedback(q);
     addParticles(q);
-    const nh = Math.max(0, Math.min(100, heartRef.current + hd));
+    const nh = Math.max(0, Math.min(100, heartRef.current + heartGain));
     heartRef.current = nh; setHeartPct(nh);
-    setScore(s => s + pts * Math.max(1, Math.floor(comboRef.current / 4) + 1));
+    setScore(s => s + scoreGain * Math.max(1, Math.floor(comboRef.current / 4) + 1));
     setPattern([]); patRef.current = [];
     setNoteStates([]);
     setInputIdx(0); idxRef.current = 0;
-    if (q === 'Miss') {
-      comboRef.current = 0; setCombo(0);
-    } else {
+    if (q === 'Perfect' || q === 'Great') {
       comboRef.current++; setCombo(c => c + 1);
+    } else {
+      comboRef.current = 0; setCombo(0);
     }
     roundJudgedRef.current = true;
   }, [addParticles]);
+
+  const handleSpaceInput = useCallback(() => {
+    if (screenRef.current !== 'playing') return;
+    if ((phaseRef.current === 'input' || phaseRef.current === 'timing') && !roundJudgedRef.current) {
+      const d = Math.abs(curRef.current - TARGET_CENTER);
+      const isInsideTarget = d <= TARGET_ZONE_WIDTH / 2;
+      const q = phaseRef.current === 'input'
+        ? 'Miss'
+        : !isInsideTarget ? 'Miss' : d <= PERFECT_WINDOW ? 'Perfect' : d <= GREAT_WINDOW ? 'Great' : d <= GOOD_WINDOW ? 'Good' : 'Miss';
+      doFeedback(q);
+      phaseRef.current = 'timing'; setPhase('timing');
+    }
+  }, [doFeedback]);
+
+  const handleArrowInput = useCallback((code) => {
+    if (screenRef.current !== 'playing' || !DIRS.includes(code) || phaseRef.current !== 'input') return;
+    const cur = idxRef.current, pat = patRef.current;
+    if (!pat.length) return;
+    if (code === pat[cur]) {
+      const ni = cur + 1;
+      setNoteStates(pat.map((_, i) => i < ni ? 'hit' : 'pending'));
+      setInputIdx(ni); idxRef.current = ni;
+      if (ni >= pat.length) {
+        phaseRef.current = 'timing'; setPhase('timing');
+      }
+    } else {
+      setNoteStates(pat.map(() => 'pending'));
+      setInputIdx(0); idxRef.current = 0;
+    }
+  }, []);
 
   const finishRound = useCallback(() => {
     phaseRef.current = 'feedback'; setPhase('feedback');
@@ -864,36 +1062,16 @@ export default function LetterB({ onBack }) {
 
       if (e.code === 'Space') {
         e.preventDefault();
-        if ((phaseRef.current === 'input' || phaseRef.current === 'timing') && !roundJudgedRef.current) {
-          const d = Math.abs(curRef.current - TARGET_CENTER);
-          const isInsideTarget = d <= TARGET_ZONE_WIDTH / 2;
-          const q = phaseRef.current === 'input'
-            ? 'Miss'
-            : !isInsideTarget ? 'Miss' : d <= PERFECT_WINDOW ? 'Perfect' : d <= GREAT_WINDOW ? 'Great' : d <= GOOD_WINDOW ? 'Good' : 'Miss';
-          doFeedback(q);
-          phaseRef.current = 'timing'; setPhase('timing');
-        }
+        handleSpaceInput();
         return;
       }
       if (!DIRS.includes(e.code) || phaseRef.current !== 'input') return;
       e.preventDefault();
-      const cur = idxRef.current, pat = patRef.current;
-      if (!pat.length) return;
-      if (e.code === pat[cur]) {
-        const ni = cur + 1;
-        setNoteStates(pat.map((_, i) => i < ni ? 'hit' : 'pending'));
-        setInputIdx(ni); idxRef.current = ni;
-        if (ni >= pat.length) {
-          phaseRef.current = 'timing'; setPhase('timing');
-        }
-      } else {
-        setNoteStates(pat.map(() => 'pending'));
-        setInputIdx(0); idxRef.current = 0;
-      }
+      handleArrowInput(e.code);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [doFeedback]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [handleArrowInput, handleSpaceInput]);
 
   // ── startGame ─────────────────────────────────────────────────────────────────
   const startGame = useCallback(() => {
@@ -1106,6 +1284,7 @@ export default function LetterB({ onBack }) {
               phase={phase} pattern={pattern} noteStates={noteStates}
               feedback={feedback} cursorPos={cursorPos} targetPulse={targetPulse}
               songElapsed={songElapsed} songDuration={songDuration} beatDebug={beatDebug} currentLevel={currentLevel}
+              onArrowInput={handleArrowInput} onSpaceInput={handleSpaceInput}
             />
             <Particles list={particles} />
           </>
@@ -1155,10 +1334,87 @@ export default function LetterB({ onBack }) {
             >
               <img className="b-start-button-image" src={A.start} alt="" />
             </button>
+            <button
+              type="button"
+              onClick={() => setShowTutorial(true)}
+              aria-label="Open tutorial"
+              style={{
+                position: 'absolute',
+                right: 64,
+                bottom: 58,
+                padding: '14px 24px',
+                border: '1.5px solid rgba(201,168,76,0.62)',
+                borderRadius: 6,
+                background: 'rgba(3,5,16,0.62)',
+                color: '#c9a84c',
+                fontFamily: 'Cinzel',
+                fontSize: 18,
+                fontWeight: 600,
+                letterSpacing: 1,
+                cursor: 'pointer',
+                boxShadow: '0 0 22px rgba(201,168,76,0.28)',
+              }}
+            >
+              Tutorial
+            </button>
           </div>
         )}
 
         {/* ── WIN SCREEN ── */}
+        {showTutorial && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(2,4,14,0.78)',
+              backdropFilter: 'blur(4px)',
+            }}
+            onClick={() => setShowTutorial(false)}
+          >
+            <div
+              style={{
+                position: 'relative',
+                width: 'min(1180px, 88vw)',
+                aspectRatio: '1670 / 941',
+                filter: 'drop-shadow(0 0 34px rgba(201,168,76,0.38))',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={A.tutorial}
+                alt="Tutorial"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                aria-label="Close tutorial"
+                style={{
+                  position: 'absolute',
+                  top: '4%',
+                  right: '14.5%',
+                  width: '3%',
+                  height: '12%',
+                  zIndex: 2,
+                  border: 0,
+                  padding: 0,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         {screen === 'win' && (
           <div style={{
             position: 'absolute', inset: 0, zIndex: 20,
@@ -1167,28 +1423,29 @@ export default function LetterB({ onBack }) {
             animation: 'introFade 0.8s ease',
           }}>
             <div style={{ fontFamily: 'Cinzel Decorative', color: '#ffd700', fontSize: 62, fontWeight: 700, textShadow: '0 0 60px rgba(255,215,0,0.85),0 0 120px rgba(201,168,76,0.3)', animation: 'heartbeat 1.3s ease-in-out infinite' }}>
-              ◆ Heart Unlocked ◆
+              ❤︎⁠ Heart Unlocked ❤︎⁠
             </div>
-            <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.75)', fontSize: 21, letterSpacing: 5 }}>The Beast's heart has opened to love</div>
-            <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 28, marginTop: 6 }}>{score.toLocaleString()} pts</div>
-            <button
-              type="button"
-              onClick={goIntro}
-              aria-label="Play again"
-              className="b-start-button"
-              style={{
-                width: 400,
-                maxWidth: '70%',
-                padding: 0,
-                border: 0,
-                background: 'transparent',
-                cursor: 'pointer',
-                marginTop: 12,
-                filter: 'drop-shadow(0 0 18px rgba(201,168,76,0.42))',
-              }}
-            >
-              <img className="b-start-button-image" src={A.playAgain} alt="" />
-            </button>
+            <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.75)', fontSize: 21, letterSpacing: 5 }}>The Beast's heart has opened to love :)</div>
+            <div style={{ position: 'absolute', bottom: 200, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <div style={{ fontFamily: 'Cinzel', color: '#ffd700', fontSize: 28, fontWeight: 700 }}>{score.toLocaleString()} pts</div>
+              <button
+                type="button"
+                onClick={goIntro}
+                aria-label="Play again"
+                className="b-start-button"
+                style={{
+                  width: 400,
+                  maxWidth: '100%',
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  filter: 'drop-shadow(0 0 18px rgba(201,168,76,0.42))',
+                }}
+              >
+                <img className="b-start-button-image" src={A.playAgain} alt="" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -1200,26 +1457,27 @@ export default function LetterB({ onBack }) {
             background: 'rgba(3,5,16,0.7)', animation: 'introFade 0.8s ease',
           }}>
             <div style={{ fontFamily: 'Cinzel Decorative', color: '#7788aa', fontSize: 50, textShadow: '0 0 40px rgba(100,120,180,0.5)' }}>The Rose Has Faded</div>
-            <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 19, letterSpacing: 4 }}>His heart remained cold…</div>
-            <div style={{ fontFamily: 'Cinzel', color: '#c9a84c', fontSize: 28, marginTop: 6 }}>{score.toLocaleString()} pts</div>
-            <button
-              type="button"
-              onClick={goIntro}
-              aria-label="Play again"
-              className="b-start-button"
-              style={{
-                width: 400,
-                maxWidth: '70%',
-                padding: 0,
-                border: 0,
-                background: 'transparent',
-                cursor: 'pointer',
-                marginTop: 12,
-                filter: 'drop-shadow(0 0 18px rgba(201,168,76,0.42))',
-              }}
-            >
-              <img className="b-start-button-image" src={A.playAgain} alt="" />
-            </button>
+            <div style={{ fontFamily: 'Cinzel', color: 'rgba(245,240,232,0.5)', fontSize: 19, letterSpacing: 4 }}>His heart remained cold :(</div>
+            <div style={{ position: 'absolute', bottom: 140, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <div style={{ fontFamily: 'Cinzel', color: '#ffd700', fontSize: 28, fontWeight: 700 }}>{score.toLocaleString()} pts</div>
+              <button
+                type="button"
+                onClick={goIntro}
+                aria-label="Play again"
+                className="b-start-button"
+                style={{
+                  width: 400,
+                  maxWidth: '100%',
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  filter: 'drop-shadow(0 0 18px rgba(201,168,76,0.42))',
+                }}
+              >
+                <img className="b-start-button-image" src={A.playAgain} alt="" />
+              </button>
+            </div>
           </div>
         )}
 
