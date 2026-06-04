@@ -303,7 +303,8 @@
   }
 
   .b-tutorial-frame {
-    width: min(1760px, 99vw) !important;
+    width: 1820px !important;
+    max-width: none !important;
   }
 
   .b-sequence-cluster {
