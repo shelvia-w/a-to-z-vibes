@@ -1376,6 +1376,7 @@ export default function LetterB({ onBack }) {
             onClick={() => setShowTutorial(false)}
           >
             <div
+              className="b-tutorial-frame"
               style={{
                 position: 'relative',
                 width: 'min(1180px, 88vw)',

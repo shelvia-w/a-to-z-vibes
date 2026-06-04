@@ -265,7 +265,9 @@
   }
 
   .b-left-panel {
+    width: 430px !important;
     height: 820px !important;
+    background: linear-gradient(90deg, rgba(3,5,16,0.92) 58%, rgba(3,5,16,0) 100%) !important;
   }
 
   .b-right-panel {
@@ -287,14 +289,21 @@
 
   .b-heart-meter-image {
     margin-bottom: 18px !important;
+    transform: translateX(-72px) !important;
   }
 
   .b-heart-meter-percent {
     margin-bottom: 26px !important;
+    transform: translateX(-72px) !important;
   }
 
   .b-beast-state-title {
+    margin-top: 22px !important;
     margin-bottom: 44px !important;
+  }
+
+  .b-tutorial-frame {
+    width: min(1540px, 96vw) !important;
   }
 
   .b-sequence-cluster {
@@ -314,13 +323,13 @@
 
   .b-mobile-dpad {
     display: grid;
-    grid-template-columns: 66px 66px 66px;
-    grid-template-rows: 66px 66px 66px;
+    grid-template-columns: 98px 98px 98px;
+    grid-template-rows: 98px 98px 98px;
     grid-template-areas:
       ". up ."
       "left . right"
       ". down .";
-    gap: 6px;
+    gap: 7px;
   }
 
   .b-mobile-arrow,
@@ -337,10 +346,10 @@
   }
 
   .b-mobile-arrow {
-    width: 66px;
-    height: 66px;
+    width: 98px;
+    height: 98px;
     border-radius: 50%;
-    font-size: 34px;
+    font-size: 40px;
     line-height: 1;
   }
 
@@ -350,17 +359,22 @@
   .b-mobile-arrow-down { grid-area: down; }
 
   .b-mobile-space {
-    width: 118px;
-    height: 118px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
-    font-size: 19px;
+    font-size: 22px;
     letter-spacing: 2px;
     background: radial-gradient(circle at 35% 35%, rgba(255, 236, 168, 0.98), rgba(201, 132, 31, 0.9) 54%, rgba(34, 20, 8, 0.95) 100%);
+    transform: translateY(58px);
   }
 
-  .b-mobile-arrow:active,
-  .b-mobile-space:active {
+  .b-mobile-arrow:active {
     transform: scale(0.94);
+    filter: brightness(1.24);
+  }
+
+  .b-mobile-space:active {
+    transform: translateY(28px) scale(0.94);
     filter: brightness(1.24);
   }
 }
