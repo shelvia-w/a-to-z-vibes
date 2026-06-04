@@ -56,7 +56,7 @@ const Card = ({ letter, onOpenSky, onOpenHeart }) => {
       <button className="card card-button" onClick={onOpenHeart}>
         <h2 className="card-number">{letter}</h2>
         <p className="card-title">Beauty and a Beat</p>
-        <p className="card-subtitle">Help Belle melt the Beast's heart through the rhythm of love.</p>
+        <p className="card-subtitle">Help Belle melt the Beast's heart through the rhythm of love (best played on desktop).</p>
       </button>
     );
   }
