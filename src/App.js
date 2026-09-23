@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./styles.css";
 import LetterA from "./letters/A/letter-a";
 import LetterB from "./letters/B/letter-b";
+import LetterC from "./letters/C/letter-c";
 
 const LETTERS = [
   "A",
@@ -38,9 +39,10 @@ const LETTERS = [
 
 const SKY_HASH = "#a-sky-full-of-stars";
 const HEART_HASH = "#b-beauty-and-a-beat";
+const CLARITY_HASH = "#c-clarity";
 const logoSrc = `${process.env.PUBLIC_URL}/img/cute_pet_logo.png`;
 
-const Card = ({ letter, onOpenSky, onOpenHeart }) => {
+const Card = ({ letter, onOpenSky, onOpenHeart, onOpenClarity }) => {
   if (letter === "A") {
     return (
       <button className="card card-button" onClick={onOpenSky}>
@@ -57,6 +59,16 @@ const Card = ({ letter, onOpenSky, onOpenHeart }) => {
         <h2 className="card-number">{letter}</h2>
         <p className="card-title">Beauty and a Beat</p>
         <p className="card-subtitle">Help Belle melt the Beast's heart through the rhythm of love (best played on desktop).</p>
+      </button>
+    );
+  }
+
+  if (letter === "C") {
+    return (
+      <button className="card card-button" onClick={onOpenClarity}>
+        <h2 className="card-number">{letter}</h2>
+        <p className="card-title">Clarity</p>
+        <p className="card-subtitle">Flow with the lantern along the river as you gently untangle what’s on your mind.</p>
       </button>
     );
   }
@@ -156,8 +168,7 @@ const SideModal = ({ isOpen, onClose }) => (
       </ModalSection>
 
       <ModalSection iconClass="section-icon-3" iconType="hand" title="Resources">
-        I will be using various AI assistants, including ChatGPT, Claude, Grok,
-        and Gemini. I'll update this section whenever I add new resources.
+        I will be using various AI assistants, mainly Codex and Claude Code. I'll update this section whenever I add new resources.
       </ModalSection>
 
       <button className="modal-button">
@@ -209,6 +220,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(() => {
     if (window.location.hash === SKY_HASH)   return "sky";
     if (window.location.hash === HEART_HASH) return "heart";
+    if (window.location.hash === CLARITY_HASH) return "clarity";
     return "home";
   });
 
@@ -216,6 +228,7 @@ export default function App() {
     const handleHashChange = () => {
       if (window.location.hash === SKY_HASH)        setCurrentPage("sky");
       else if (window.location.hash === HEART_HASH) setCurrentPage("heart");
+      else if (window.location.hash === CLARITY_HASH) setCurrentPage("clarity");
       else                                           setCurrentPage("home");
     };
 
@@ -243,12 +256,26 @@ export default function App() {
     setCurrentPage("home");
   };
 
+  const openClarityPage = () => {
+    window.location.hash = CLARITY_HASH;
+    setCurrentPage("clarity");
+  };
+
+  const closeClarityPage = () => {
+    window.location.hash = "";
+    setCurrentPage("home");
+  };
+
   if (currentPage === "sky") {
     return <LetterA onBack={closeSkyPage} />;
   }
 
   if (currentPage === "heart") {
     return <LetterB onBack={closeHeartPage} />;
+  }
+
+  if (currentPage === "clarity") {
+    return <LetterC onBack={closeClarityPage} />;
   }
 
   return (
@@ -273,7 +300,13 @@ export default function App() {
 
       <main className="grid">
         {LETTERS.map((letter) => (
-          <Card key={letter} letter={letter} onOpenSky={openSkyPage} onOpenHeart={openHeartPage} />
+          <Card
+            key={letter}
+            letter={letter}
+            onOpenSky={openSkyPage}
+            onOpenHeart={openHeartPage}
+            onOpenClarity={openClarityPage}
+          />
         ))}
       </main>
 

@@ -266,9 +266,11 @@ export default function LetterA({ onBack }) {
   }, []);
 
   const handlePointerMove = (event) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+
     setPointer({
-      x: (event.clientX / window.innerWidth) * 100,
-      y: (event.clientY / window.innerHeight) * 100,
+      x: ((event.clientX - bounds.left) / bounds.width) * 100,
+      y: ((event.clientY - bounds.top) / bounds.height) * 100,
     });
   };
 
@@ -290,7 +292,7 @@ export default function LetterA({ onBack }) {
   };
 
   return (
-    <main className="sky-page landscape-project-page" style={sceneStyle} onPointerMove={handlePointerMove}>
+    <main className="sky-page landscape-project-page">
       <audio ref={audioRef} src={audioSrc} autoPlay loop preload="auto" />
 
       <div className="sky-outer-header">
@@ -305,7 +307,13 @@ export default function LetterA({ onBack }) {
       </div>
 
       <LandscapeOnlyProject onBack={onBack}>
-        <section className="constellation-shell" ref={shellRef} aria-label="Constellation Explorer">
+        <section
+          className="constellation-shell"
+          ref={shellRef}
+          style={sceneStyle}
+          onPointerMove={handlePointerMove}
+          aria-label="Constellation Explorer"
+        >
           <button
             type="button"
             className="sky-fullscreen-button"

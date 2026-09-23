@@ -71,7 +71,6 @@
   isolation: isolate;
   color: #fbfbff;
   background:
-    radial-gradient(circle at var(--glow-x) var(--glow-y), rgba(255, 119, 233, 0.14), transparent 20rem),
     radial-gradient(circle at 15% 10%, rgba(218, 182, 25, 0.1), transparent 22rem),
     linear-gradient(140deg, #080415 0%, #17113e 48%, #060615 100%);
 }
